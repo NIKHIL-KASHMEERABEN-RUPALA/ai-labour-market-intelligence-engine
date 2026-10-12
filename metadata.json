@@ -1,0 +1,6 @@
+{
+  "name": "National Labour & Skill Observatory",
+  "description": "National Command Centre for Labour and Skill Intelligence, Ministry of Skill Development and Entrepreneurship, Government of India.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
