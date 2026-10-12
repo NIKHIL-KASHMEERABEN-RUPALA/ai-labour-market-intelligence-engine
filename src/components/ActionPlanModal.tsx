@@ -24,7 +24,7 @@ export const ActionPlanModal: React.FC<ActionPlanModalProps> = ({
   // Calculate estimated budget in Crores (approx ₹20,000 per seat under PMKVY Special Project)
   const estimatedBudgetCrores = (item.shortageVolume * 20000) / 10000000;
 
-  const t = {
+  const dict = {
     en: {
       title: 'PMKVY 4.0 Special Drive Requisition Order',
       subtitle: 'Fast-Track Seat Sanction & Apprenticeship Allocation Memo',
@@ -63,7 +63,8 @@ export const ActionPlanModal: React.FC<ActionPlanModalProps> = ({
       close: 'रद्द करें',
       authorizedSuccess: 'मांग औपचारिक रूप से कार्यकारी समिति को प्रेषित की गई',
     },
-  }[language];
+  };
+  const t = dict[language === 'hi' ? 'hi' : 'en'];
 
   const handleAuthorize = () => {
     setIsSubmitting(true);

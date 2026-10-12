@@ -13,7 +13,7 @@ export const CabinetNoteModal: React.FC<CabinetNoteModalProps> = ({
   onClose,
   onPrint,
 }) => {
-  const t = {
+  const dict = {
     en: {
       secretStamp: 'SECRET / FOR CABINET COMMITTEE ON ECONOMIC AFFAIRS (CCEA) ONLY',
       govHeader: 'GOVERNMENT OF INDIA • MINISTRY OF SKILL DEVELOPMENT & ENTREPRENEURSHIP',
@@ -50,7 +50,8 @@ export const CabinetNoteModal: React.FC<CabinetNoteModalProps> = ({
       printBtn: 'प्रिंट / पीडीएफ सुरक्षित करें',
       close: 'बंद करें',
     },
-  }[language];
+  };
+  const t = dict[language === 'hi' ? 'hi' : 'en'];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs p-4 overflow-y-auto">

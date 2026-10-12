@@ -7,7 +7,7 @@ interface BottomStatusBarProps {
 }
 
 export const BottomStatusBar: React.FC<BottomStatusBarProps> = ({ language }) => {
-  const t = {
+  const dict = {
     en: {
       dataSources: 'Live data sources: NCS • e-Shram • Monster & Naukri Aggregator • PLFS (MoSPI) • SSC Inputs • EPFO Monthly Payrolls',
       modelRefresh: 'Last model refresh: 14:32 IST',
@@ -20,7 +20,8 @@ export const BottomStatusBar: React.FC<BottomStatusBarProps> = ({ language }) =>
       coverage: 'कवरेज: 98.7% जिले (742 / 766)',
       engine: 'इंजन: बायेसियन लेबर फोरकास्टिंग v3.2',
     },
-  }[language];
+  };
+  const t = dict[language === 'hi' ? 'hi' : 'en'];
 
   return (
     <footer className="w-full bg-[#071E3D] text-slate-300 border-t border-[#0E2C52] py-2.5 px-4 sm:px-6 text-[11px] select-none">

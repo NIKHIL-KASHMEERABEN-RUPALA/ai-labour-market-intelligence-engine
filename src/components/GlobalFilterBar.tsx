@@ -47,6 +47,10 @@ export const GlobalFilterBar: React.FC<GlobalFilterBarProps> = ({
   const resetFilters = useDashboardStore((s) => s.resetFilters);
   const isRefetching = useDashboardStore((s) => s.isRefetching);
 
+  const scenarioSliders = useDashboardStore((s) => s.scenarioSliders);
+  const setScenarioSliders = useDashboardStore((s) => s.setScenarioSliders);
+
+  const [showScenarioPanel, setShowScenarioPanel] = useState(false);
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [nlQuery, setNlQuery] = useState('');
 
