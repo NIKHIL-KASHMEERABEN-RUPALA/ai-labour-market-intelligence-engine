@@ -18,7 +18,15 @@
     "jsx": "react-jsx",
     "paths": {
       "@/*": [
+        "./frontend/src/*",
+        "./src/*",
         "./*"
+      ],
+      "@frontend/*": [
+        "./frontend/src/*"
+      ],
+      "@backend/*": [
+        "./backend/*"
       ]
     },
     "allowImportingTsExtensions": true,

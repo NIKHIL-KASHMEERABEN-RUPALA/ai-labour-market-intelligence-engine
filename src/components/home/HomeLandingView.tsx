@@ -1,5 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
-import * as THREE from 'three';
+import React, { useState } from 'react';
 import {
   ShieldCheck,
   LayoutDashboard,
@@ -33,11 +32,10 @@ import {
 import {
   INDIA_INDUSTRIAL_CLUSTERS,
   GLOBAL_PARTNER_COUNTRIES,
-  SKILL_MOBILITY_ARCS,
-  generateWorldMapCanvasTexture,
   IndiaClusterData,
   GlobalCountry
 } from '../../data/globeWorldData';
+import { InteractiveGlobeR3F } from './InteractiveGlobeR3F';
 
 interface HomeLandingViewProps {
   onNavigateTab: (tabId: string) => void;
@@ -51,7 +49,6 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
   language,
   onExportBrief,
 }) => {
-  const mountRef = useRef<HTMLDivElement>(null);
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const [authModal, setAuthModal] = useState<'signin' | 'signup' | null>(null);
   const [email, setEmail] = useState('');
@@ -74,420 +71,6 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
     : regionFilter === 'Global'
       ? []
       : INDIA_INDUSTRIAL_CLUSTERS.filter(c => c.region === regionFilter || (regionFilter === 'Central' && (c.region === 'Central' || c.region === 'East')));
-
-  // Three.js Interactive 3D World Globe with Detailed Countries & Distributed Indian Nodes
-  useEffect(() => {
-    const currentMount = mountRef.current;
-    if (!currentMount) return;
-
-    // 1. Scene & Camera Setup
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(
-      55,
-      currentMount.clientWidth / currentMount.clientHeight,
-      0.1,
-      1000
-    );
-    camera.position.z = 5.2;
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(currentMount.clientWidth, currentMount.clientHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    currentMount.appendChild(renderer.domElement);
-
-    // 2. Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
-    scene.add(ambientLight);
-
-    const directionalLight1 = new THREE.DirectionalLight(0x38bdf8, 2.0);
-    directionalLight1.position.set(6, 4, 6);
-    scene.add(directionalLight1);
-
-    const directionalLight2 = new THREE.DirectionalLight(0xf28c28, 1.2);
-    directionalLight2.position.set(-6, -3, -4);
-    scene.add(directionalLight2);
-
-    // 3. Mathematical Coordinate Projection (Lat/Lng to Cartesian on Sphere)
-    const globeRadius = 2.05;
-    const latLngToVector3 = (lat: number, lng: number, radius: number) => {
-      const phi = (90 - lat) * (Math.PI / 180);
-      const theta = (lng + 180) * (Math.PI / 180);
-      const x = -radius * Math.cos(theta) * Math.sin(phi);
-      const y = radius * Math.cos(phi);
-      const z = radius * Math.sin(theta) * Math.sin(phi);
-      return new THREE.Vector3(x, y, z);
-    };
-
-    // 4. Main Globe Hierarchy Group (ensures all elements rotate together seamlessly)
-    const globeGroup = new THREE.Group();
-    scene.add(globeGroup);
-
-    // Set initial orientation so India is prominently centered and tilted towards viewer
-    globeGroup.rotation.y = -1.82; // Rotates India to face the camera
-    globeGroup.rotation.x = 0.32;  // Slight tilt so Northern Hemisphere is clearly visible
-
-    // 5. World Map Canvas Texture
-    const mapCanvas = generateWorldMapCanvasTexture();
-    const worldTexture = new THREE.CanvasTexture(mapCanvas);
-    worldTexture.wrapS = THREE.ClampToEdgeWrapping;
-    worldTexture.wrapT = THREE.ClampToEdgeWrapping;
-
-    const globeGeo = new THREE.SphereGeometry(globeRadius, 64, 64);
-    const globeMat = new THREE.MeshPhongMaterial({
-      map: worldTexture,
-      shininess: 25,
-      specular: new THREE.Color(0x38bdf8),
-      transparent: true,
-      opacity: 0.98,
-    });
-    const globeMesh = new THREE.Mesh(globeGeo, globeMat);
-    globeGroup.add(globeMesh);
-
-    // Outer Atmospheric Glow Layer
-    const atmosGeo = new THREE.SphereGeometry(globeRadius * 1.035, 48, 48);
-    const atmosMat = new THREE.MeshBasicMaterial({
-      color: 0x38bdf8,
-      transparent: true,
-      opacity: 0.14,
-      wireframe: true,
-    });
-    const atmosMesh = new THREE.Mesh(atmosGeo, atmosMat);
-    globeGroup.add(atmosMesh);
-
-    // 6. India Telemetry Constellation: 130+ micro-sensor points scattered across all states of India
-    // Coordinates mathematically generated across India's real geographic bounds:
-    const indiaMicroNodesGroup = new THREE.Group();
-    globeGroup.add(indiaMicroNodesGroup);
-
-    // India geographic bounding boxes: North, West, Central, South, East, North-East
-    const indiaSubRegions = [
-      { minLat: 27.5, maxLat: 34.0, minLng: 74.0, maxLng: 79.5, count: 28 }, // North (J&K, Punjab, Haryana, HP, UK)
-      { minLat: 21.0, maxLat: 27.5, minLng: 69.5, maxLng: 75.5, count: 26 }, // West (Gujarat, Rajasthan)
-      { minLat: 18.0, maxLat: 24.5, minLng: 74.5, maxLng: 82.5, count: 32 }, // Central & Maharashtra
-      { minLat: 8.5, maxLat: 18.0, minLng: 75.0, maxLng: 82.0, count: 36 },  // South (Karnataka, TN, Kerala, AP, Telangana)
-      { minLat: 20.0, maxLat: 26.5, minLng: 83.0, maxLng: 88.5, count: 24 }, // East (Bengal, Odisha, Jharkhand, Bihar)
-      { minLat: 24.5, maxLat: 27.5, minLng: 90.5, maxLng: 94.5, count: 16 }  // North-East (Assam & Gateway)
-    ];
-
-    const sensorPositions: number[] = [];
-    indiaSubRegions.forEach(reg => {
-      for (let i = 0; i < reg.count; i++) {
-        const lat = reg.minLat + Math.random() * (reg.maxLat - reg.minLat);
-        const lng = reg.minLng + Math.random() * (reg.maxLng - reg.minLng);
-        const pos = latLngToVector3(lat, lng, globeRadius * 1.008);
-        sensorPositions.push(pos.x, pos.y, pos.z);
-      }
-    });
-
-    const sensorGeo = new THREE.BufferGeometry();
-    sensorGeo.setAttribute('position', new THREE.Float32BufferAttribute(sensorPositions, 3));
-    const sensorMat = new THREE.PointsMaterial({
-      color: 0xf28c28,
-      size: 0.038,
-      transparent: true,
-      opacity: 0.75,
-    });
-    const sensorPoints = new THREE.Points(sensorGeo, sensorMat);
-    indiaMicroNodesGroup.add(sensorPoints);
-
-    // 7. Interactive Indian Industrial Cluster Pins (22 Major Hubs)
-    const clustersGroup = new THREE.Group();
-    globeGroup.add(clustersGroup);
-
-    const clusterInteractiveMeshes: THREE.Mesh[] = [];
-
-    INDIA_INDUSTRIAL_CLUSTERS.forEach((cluster) => {
-      const pos = latLngToVector3(cluster.lat, cluster.lng, globeRadius * 1.015);
-      const isHovered = cluster.id === hoveredClusterId || cluster.id === selectedCluster?.id;
-
-      // Pin core sphere
-      const pinGeo = new THREE.SphereGeometry(isHovered ? 0.08 : 0.055, 16, 16);
-      const pinMat = new THREE.MeshBasicMaterial({
-        color: isHovered ? 0xffffff : parseInt(cluster.color.replace('#', '0x')),
-      });
-      const pinMesh = new THREE.Mesh(pinGeo, pinMat);
-      pinMesh.position.copy(pos);
-      pinMesh.userData = { type: 'cluster', id: cluster.id, data: cluster };
-      clustersGroup.add(pinMesh);
-      clusterInteractiveMeshes.push(pinMesh);
-
-      // Pulsing outer beacon ring
-      const ringGeo = new THREE.RingGeometry(0.08, 0.12, 16);
-      const ringMat = new THREE.MeshBasicMaterial({
-        color: parseInt(cluster.color.replace('#', '0x')),
-        side: THREE.DoubleSide,
-        transparent: true,
-        opacity: isHovered ? 0.9 : 0.6,
-      });
-      const ringMesh = new THREE.Mesh(ringGeo, ringMat);
-      ringMesh.position.copy(pos);
-      ringMesh.lookAt(0, 0, 0);
-      clustersGroup.add(ringMesh);
-    });
-
-    // 8. Global Partner Countries Pins (World Nations Highlighting)
-    const countriesGroup = new THREE.Group();
-    globeGroup.add(countriesGroup);
-
-    const countryInteractiveMeshes: THREE.Mesh[] = [];
-
-    GLOBAL_PARTNER_COUNTRIES.forEach((country) => {
-      if (country.id === 'india') return; // Handled specially
-      const pos = latLngToVector3(country.lat, country.lng, globeRadius * 1.015);
-      const isHovered = country.id === hoveredCountryId || country.id === selectedCountry?.id;
-
-      // Hexagonal / Diamond country marker
-      const markerGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.03, 6);
-      const markerMat = new THREE.MeshBasicMaterial({
-        color: isHovered ? 0xffffff : parseInt(country.color.replace('#', '0x')),
-      });
-      const markerMesh = new THREE.Mesh(markerGeo, markerMat);
-      markerMesh.position.copy(pos);
-      markerMesh.lookAt(0, 0, 0);
-      markerMesh.rotateX(Math.PI / 2);
-      markerMesh.userData = { type: 'country', id: country.id, data: country };
-      countriesGroup.add(markerMesh);
-      countryInteractiveMeshes.push(markerMesh);
-
-      // Outer ring for global partners
-      const partnerRingGeo = new THREE.RingGeometry(0.07, 0.10, 16);
-      const partnerRingMat = new THREE.MeshBasicMaterial({
-        color: parseInt(country.color.replace('#', '0x')),
-        side: THREE.DoubleSide,
-        transparent: true,
-        opacity: 0.5,
-      });
-      const partnerRing = new THREE.Mesh(partnerRingGeo, partnerRingMat);
-      partnerRing.position.copy(pos);
-      partnerRing.lookAt(0, 0, 0);
-      countriesGroup.add(partnerRing);
-    });
-
-    // 9. Great Circle Flight & Skill Mobility Arcs (Connecting India to World Partners)
-    const arcsGroup = new THREE.Group();
-    globeGroup.add(arcsGroup);
-
-    SKILL_MOBILITY_ARCS.forEach((arc) => {
-      const p1 = latLngToVector3(arc.from.lat, arc.from.lng, globeRadius * 1.015);
-      const p2 = latLngToVector3(arc.to.lat, arc.to.lng, globeRadius * 1.015);
-
-      const distance = p1.distanceTo(p2);
-      const mid = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
-      const altitude = globeRadius + Math.min(distance * 0.32, 1.1);
-      mid.normalize().multiplyScalar(altitude);
-
-      const curve = new THREE.QuadraticBezierCurve3(p1, mid, p2);
-      const points = curve.getPoints(45);
-      const curveGeo = new THREE.BufferGeometry().setFromPoints(points);
-      const curveMat = new THREE.LineBasicMaterial({
-        color: parseInt(arc.color.replace('#', '0x')),
-        transparent: true,
-        opacity: 0.65,
-      });
-      const lineMesh = new THREE.Line(curveGeo, curveMat);
-      arcsGroup.add(lineMesh);
-    });
-
-    // 10. Starfield / Ambient Particles
-    const starCount = 500;
-    const starGeo = new THREE.BufferGeometry();
-    const starPos = new Float32Array(starCount * 3);
-    for (let i = 0; i < starCount * 3; i += 3) {
-      starPos[i] = (Math.random() - 0.5) * 16;
-      starPos[i + 1] = (Math.random() - 0.5) * 16;
-      starPos[i + 2] = (Math.random() - 0.5) * 16;
-    }
-    starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
-    const starMat = new THREE.PointsMaterial({ size: 0.035, color: 0x38bdf8, transparent: true, opacity: 0.45 });
-    const stars = new THREE.Points(starGeo, starMat);
-    scene.add(stars);
-
-    // 11. Mouse Drag & Raycasting Interaction
-    let isDragging = false;
-    let previousMousePosition = { x: 0, y: 0 };
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
-
-    const handleMouseDown = (e: MouseEvent) => {
-      isDragging = true;
-      previousMousePosition = { x: e.clientX, y: e.clientY };
-    };
-
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = currentMount.getBoundingClientRect();
-      mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-      mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-
-      if (isDragging) {
-        const deltaX = e.clientX - previousMousePosition.x;
-        const deltaY = e.clientY - previousMousePosition.y;
-
-        globeGroup.rotation.y += deltaX * 0.007;
-        globeGroup.rotation.x += deltaY * 0.007;
-
-        // Limit X rotation to avoid flipping upside down
-        globeGroup.rotation.x = Math.max(-0.8, Math.min(0.8, globeGroup.rotation.x));
-
-        previousMousePosition = { x: e.clientX, y: e.clientY };
-      }
-
-      // Raycast interactive cluster & country objects
-      raycaster.setFromCamera(mouse, camera);
-      const allInteractives = [...clusterInteractiveMeshes, ...countryInteractiveMeshes];
-      const intersects = raycaster.intersectObjects(allInteractives);
-
-      if (intersects.length > 0) {
-        const hit = intersects[0].object as THREE.Mesh;
-        if (hit.userData?.type === 'cluster') {
-          setHoveredClusterId(hit.userData.id);
-          setHoveredCountryId(null);
-          currentMount.style.cursor = 'pointer';
-          return;
-        } else if (hit.userData?.type === 'country') {
-          setHoveredCountryId(hit.userData.id);
-          setHoveredClusterId(null);
-          currentMount.style.cursor = 'pointer';
-          return;
-        }
-      }
-
-      setHoveredClusterId(null);
-      setHoveredCountryId(null);
-      currentMount.style.cursor = isDragging ? 'grabbing' : 'grab';
-    };
-
-    const handleMouseUp = () => {
-      isDragging = false;
-    };
-
-    const handleClick = () => {
-      raycaster.setFromCamera(mouse, camera);
-      const allInteractives = [...clusterInteractiveMeshes, ...countryInteractiveMeshes];
-      const intersects = raycaster.intersectObjects(allInteractives);
-
-      if (intersects.length > 0) {
-        const hit = intersects[0].object as THREE.Mesh;
-        if (hit.userData?.type === 'cluster') {
-          const found = INDIA_INDUSTRIAL_CLUSTERS.find(c => c.id === hit.userData.id);
-          if (found) {
-            setSelectedCluster(found);
-            setSelectedCountry(null);
-          }
-        } else if (hit.userData?.type === 'country') {
-          const found = GLOBAL_PARTNER_COUNTRIES.find(c => c.id === hit.userData.id);
-          if (found) {
-            setSelectedCountry(found);
-            setSelectedCluster(null);
-          }
-        }
-      }
-    };
-
-    currentMount.addEventListener('mousedown', handleMouseDown);
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
-    currentMount.addEventListener('click', handleClick);
-
-    // Mobile & Tablet Touch Interactions
-    const handleTouchStart = (e: TouchEvent) => {
-      if (e.touches.length === 1) {
-        isDragging = true;
-        previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-      }
-    };
-    const handleTouchMove = (e: TouchEvent) => {
-      if (!isDragging || e.touches.length !== 1) return;
-      const deltaX = e.touches[0].clientX - previousMousePosition.x;
-      const deltaY = e.touches[0].clientY - previousMousePosition.y;
-      globeGroup.rotation.y += deltaX * 0.005;
-      globeGroup.rotation.x = Math.max(-0.9, Math.min(0.9, globeGroup.rotation.x + deltaY * 0.005));
-      previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    };
-    const handleTouchEnd = () => {
-      isDragging = false;
-    };
-
-    currentMount.addEventListener('touchstart', handleTouchStart, { passive: true });
-    window.addEventListener('touchmove', handleTouchMove, { passive: true });
-    window.addEventListener('touchend', handleTouchEnd);
-
-    // 12. Animation Loop
-    let animationFrameId: number;
-    const clock = new THREE.Clock();
-
-    const animate = () => {
-      animationFrameId = requestAnimationFrame(animate);
-      const elapsedTime = clock.getElapsedTime();
-
-      // Gentle auto-rotation when user is not actively interacting
-      if (!isDragging && !selectedCluster && !selectedCountry && !hoveredClusterId && !hoveredCountryId) {
-        globeGroup.rotation.y += 0.0012;
-      }
-
-      // Animate pulsing rings on clusters
-      clustersGroup.children.forEach((child, idx) => {
-        if (child instanceof THREE.Mesh && child.geometry instanceof THREE.RingGeometry) {
-          const scale = 1 + Math.sin(elapsedTime * 3.5 + idx * 0.8) * 0.22;
-          child.scale.set(scale, scale, scale);
-        }
-      });
-
-      // Animate global partner markers
-      countriesGroup.children.forEach((child, idx) => {
-        if (child instanceof THREE.Mesh && child.geometry instanceof THREE.RingGeometry) {
-          const scale = 1 + Math.sin(elapsedTime * 2.8 + idx * 0.6) * 0.18;
-          child.scale.set(scale, scale, scale);
-        }
-      });
-
-      renderer.render(scene, camera);
-    };
-
-    animate();
-
-    const handleResize = () => {
-      if (!currentMount) return;
-      const width = currentMount.clientWidth;
-      const height = currentMount.clientHeight;
-      if (width === 0 || height === 0) return;
-      camera.aspect = width / height;
-      camera.updateProjectionMatrix();
-      renderer.setSize(width, height);
-    };
-
-    window.addEventListener('resize', handleResize);
-    const resizeObserver = new ResizeObserver(() => handleResize());
-    resizeObserver.observe(currentMount);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      resizeObserver.disconnect();
-      if (currentMount) {
-        currentMount.removeEventListener('mousedown', handleMouseDown);
-        currentMount.removeEventListener('click', handleClick);
-        currentMount.removeEventListener('touchstart', handleTouchStart);
-        if (renderer.domElement && currentMount.contains(renderer.domElement)) {
-          currentMount.removeChild(renderer.domElement);
-        }
-      }
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-      window.removeEventListener('touchmove', handleTouchMove);
-      window.removeEventListener('touchend', handleTouchEnd);
-      cancelAnimationFrame(animationFrameId);
-
-      // Dispose Three resources
-      globeGeo.dispose();
-      globeMat.dispose();
-      atmosGeo.dispose();
-      atmosMat.dispose();
-      worldTexture.dispose();
-      starGeo.dispose();
-      starMat.dispose();
-      sensorGeo.dispose();
-      sensorMat.dispose();
-    };
-  }, [hoveredClusterId, hoveredCountryId, selectedCluster, selectedCountry]);
 
   const handleAuthSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -659,11 +242,24 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
           {/* Hero Right: 3D Interactive World Globe with Countries & Indian Nodes */}
           <div className="lg:col-span-5 flex flex-col items-center justify-center relative w-full">
             
-            <div
-              ref={mountRef}
-              className="w-full h-[270px] min-[400px]:h-[310px] sm:h-[390px] md:h-[430px] lg:h-[480px] rounded-2xl cursor-grab active:cursor-grabbing relative"
-              title="Interactive 3D World & India Globe - Drag to rotate in 360°, click any country or cluster"
-            />
+            <div className="w-full h-[270px] min-[400px]:h-[310px] sm:h-[390px] md:h-[430px] lg:h-[480px] rounded-2xl relative overflow-hidden">
+              <InteractiveGlobeR3F
+                onSelectCluster={(cluster) => {
+                  setSelectedCluster(cluster);
+                  setSelectedCountry(null);
+                }}
+                onSelectCountry={(country) => {
+                  setSelectedCountry(country);
+                  setSelectedCluster(null);
+                }}
+                onHoverCluster={setHoveredClusterId}
+                onHoverCountry={setHoveredCountryId}
+                selectedClusterId={selectedCluster?.id}
+                selectedCountryId={selectedCountry?.id}
+                hoveredClusterId={hoveredClusterId}
+                hoveredCountryId={hoveredCountryId}
+              />
+            </div>
 
             {/* Active Hover / Floating Tooltip Banner */}
             {hoveredClusterId && !selectedCluster && (
@@ -702,12 +298,6 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
                   </div>
                 );
               })()
-            )}
-
-            {!hoveredClusterId && !hoveredCountryId && !selectedCluster && !selectedCountry && (
-              <div className="absolute bottom-2 text-center text-[10px] font-mono text-slate-300 bg-slate-900/85 backdrop-blur-sm px-3 py-1 rounded-full border border-slate-700/80 shadow-md max-w-[95%] truncate">
-                🌐 Drag to rotate in 360° • Click cluster or partner nation
-              </div>
             )}
 
           </div>

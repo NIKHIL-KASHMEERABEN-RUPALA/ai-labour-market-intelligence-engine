@@ -691,9 +691,10 @@ export const SKILL_MOBILITY_ARCS: SkillCorridorArc[] = [
  * Draws world continents, country boundaries, latitude/longitude graticules,
  * and prominently accents India with glowing golden-saffron national borders and internal subdivisions.
  */
-export function generateWorldMapCanvasTexture(): HTMLCanvasElement {
-  const width = 2048;
-  const height = 1024;
+export function generateWorldMapCanvasTexture(targetWidth = 2048, targetHeight = 1024): HTMLCanvasElement {
+  const width = targetWidth;
+  const height = targetHeight;
+  const scale = width / 2048;
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
@@ -1010,12 +1011,14 @@ export function generateWorldMapCanvasTexture(): HTMLCanvasElement {
   });
 
   // Country Labels painted on map canvas
-  ctx.font = 'bold 13px system-ui, -apple-system, sans-serif';
+  const indiaFontSize = Math.max(9, Math.round(13 * scale));
+  ctx.font = `bold ${indiaFontSize}px system-ui, -apple-system, sans-serif`;
   ctx.fillStyle = '#F28C28';
   ctx.textAlign = 'center';
   ctx.fillText('INDIA', toCanvasX(78.5), toCanvasY(21.5));
 
-  ctx.font = '9px system-ui, -apple-system, sans-serif';
+  const countryFontSize = Math.max(7, Math.round(9 * scale));
+  ctx.font = `${countryFontSize}px system-ui, -apple-system, sans-serif`;
   ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
   ctx.fillText('USA', toCanvasX(-98), toCanvasY(38));
   ctx.fillText('GERMANY', toCanvasX(10), toCanvasY(52));
