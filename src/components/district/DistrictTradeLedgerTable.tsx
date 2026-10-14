@@ -137,8 +137,8 @@ export const DistrictTradeLedgerTable: React.FC<DistrictTradeLedgerTableProps> =
       </div>
 
       {/* Dense Data Table */}
-      <div className="overflow-x-auto pt-2">
-        <table className="w-full text-xs text-left border-collapse">
+      <div className="overflow-x-auto pt-2 border border-slate-200/80 rounded-xl">
+        <table className="w-full text-xs text-left border-collapse min-w-[700px]">
           <thead>
             <tr className="border-b border-slate-200 text-slate-500 font-mono text-[10px] uppercase font-bold tracking-wider">
               <th className="py-2.5 px-3">{t.tradeCol}</th>

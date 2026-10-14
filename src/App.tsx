@@ -169,22 +169,10 @@ export default function App() {
         onNavigateTab={(tabId) => setActiveSidebarTab(tabId)}
       />
 
-      {/* Main Workspace Frame with Sidebar + Main Content */}
-      <div className="flex-1 flex w-full">
-        
-        {/* 2. Left MSDE Sidebar */}
-        {activeSidebarTab !== 'home' && (
-          <div className="hidden lg:block shrink-0">
-            <Sidebar
-              language={language}
-              activeTab={activeSidebarTab}
-              onTabChange={(tabId) => setActiveSidebarTab(tabId)}
-            />
-          </div>
-        )}
-
-        {/* 3. Main Content Viewport */}
-        <main className="flex-1 p-3 sm:p-5 max-w-[1600px] mx-auto space-y-3.5 w-full">
+      {/* Main Workspace Frame with Full Width Main Content */}
+      <div className="flex-1 flex flex-col w-full">
+        {/* Main Content Viewport */}
+        <main className="flex-1 px-2.5 sm:px-4 md:px-6 py-3 sm:py-5 max-w-[1700px] mx-auto space-y-3.5 sm:space-y-4 w-full">
           
           {/* Global Header Filter Bar (Affects EVERY page, shareable URL state, live recomputations) */}
           {activeSidebarTab !== 'home' && (

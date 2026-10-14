@@ -61,19 +61,19 @@ export const StateDrilldownModal: React.FC<StateDrilldownModalProps> = ({
   const t = dict[language === 'hi' ? 'hi' : 'en'];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto">
-      <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden my-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-2 sm:p-4 overflow-y-auto">
+      <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden my-4 sm:my-8 mx-2">
         
         {/* Modal Header */}
-        <div className="bg-[#071E3D] text-white p-5 flex items-start justify-between">
-          <div>
-            <div className="flex items-center gap-2 text-xs font-mono text-blue-200 uppercase tracking-wider">
-              <MapPin className="h-3.5 w-3.5 text-amber-300" />
-              <span>{t.govHeader}</span>
+        <div className="bg-[#071E3D] text-white p-4 sm:p-5 flex items-start justify-between">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 text-xs font-mono text-blue-200 uppercase tracking-wider truncate">
+              <MapPin className="h-3.5 w-3.5 text-amber-300 shrink-0" />
+              <span className="truncate">{t.govHeader}</span>
             </div>
-            <h2 className="text-xl font-extrabold mt-1 text-white flex items-center gap-2">
-              <span>{language === 'en' ? stateData.name : stateData.nameHi}</span>
-              <span className="text-xs px-2 py-0.5 rounded bg-white/10 font-mono">
+            <h2 className="text-lg sm:text-xl font-extrabold mt-1 text-white flex items-center gap-2">
+              <span className="truncate">{language === 'en' ? stateData.name : stateData.nameHi}</span>
+              <span className="text-xs px-2 py-0.5 rounded bg-white/10 font-mono shrink-0">
                 {stateData.id}
               </span>
             </h2>
@@ -81,14 +81,14 @@ export const StateDrilldownModal: React.FC<StateDrilldownModalProps> = ({
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
+            className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors shrink-0 ml-2"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 space-y-5 max-h-[75vh] overflow-y-auto">
+        <div className="p-4 sm:p-6 space-y-4 sm:space-y-5 max-h-[75vh] overflow-y-auto">
           
           {/* Key Stat Cards Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -183,10 +183,10 @@ export const StateDrilldownModal: React.FC<StateDrilldownModalProps> = ({
         </div>
 
         {/* Modal Footer Actions */}
-        <div className="bg-slate-50 border-t border-slate-200 p-4 flex items-center justify-between gap-3">
+        <div className="bg-slate-50 border-t border-slate-200 p-3 sm:p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-200 transition-colors"
+            className="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-200 transition-colors text-center"
           >
             {t.close}
           </button>
@@ -197,7 +197,7 @@ export const StateDrilldownModal: React.FC<StateDrilldownModalProps> = ({
                 onRequestCohort(stateData);
                 onClose();
               }}
-              className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold bg-[#0A3D62] hover:bg-[#072d49] text-white rounded-lg shadow-xs transition-colors cursor-pointer"
+              className="w-full sm:w-auto justify-center flex items-center gap-1.5 px-4 py-2 text-xs font-bold bg-[#0A3D62] hover:bg-[#072d49] text-white rounded-lg shadow-xs transition-colors cursor-pointer"
             >
               <span>{t.actionBtn}</span>
               <ArrowRight className="h-3.5 w-3.5" />

@@ -738,8 +738,8 @@ export const GovernmentDecisionSupportHub: React.FC<GovernmentDecisionSupportHub
         </div>
 
         {/* Cadence Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+        <div className="overflow-x-auto border border-slate-200/80 rounded-xl">
+          <table className="w-full text-left text-xs min-w-[700px]">
             <thead>
               <tr className="bg-slate-50 text-slate-500 font-mono uppercase tracking-wider text-[10px] border-b border-slate-200">
                 <th className="p-3 font-bold">DISPATCH STREAM TITLE</th>

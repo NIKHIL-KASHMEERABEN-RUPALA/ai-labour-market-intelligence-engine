@@ -52,6 +52,7 @@ export const GlobalFilterBar: React.FC<GlobalFilterBarProps> = ({
 
   const [showScenarioPanel, setShowScenarioPanel] = useState(false);
   const [showActionsMenu, setShowActionsMenu] = useState(false);
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [nlQuery, setNlQuery] = useState('');
 
   const t = {
@@ -131,12 +132,28 @@ export const GlobalFilterBar: React.FC<GlobalFilterBarProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-xs border border-[#E3E8EF] p-3 space-y-2.5 transition-all">
+    <div className="bg-white rounded-xl shadow-xs border border-[#E3E8EF] p-2.5 sm:p-3 space-y-2.5 transition-all">
+      {/* Mobile Quick Bar (Phones < md) */}
+      <div className="flex md:hidden items-center justify-between gap-2 border-b border-slate-100 pb-2">
+        <div className="flex items-center gap-1.5 min-w-0 text-[11px] font-mono text-slate-600 truncate">
+          <Filter className="h-3.5 w-3.5 text-[#0B1F3A] shrink-0" />
+          <span className="font-bold text-[#0B1F3A] uppercase">Active:</span>
+          <span className="truncate">{selectedSector} • {selectedGeography} • {selectedTimeHorizon}</span>
+        </div>
+        <button
+          onClick={() => setIsMobileFiltersOpen(!isMobileFiltersOpen)}
+          className="flex items-center gap-1 px-2.5 py-1 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg shrink-0 transition-colors cursor-pointer"
+        >
+          <span>{isMobileFiltersOpen ? 'Hide' : 'Filters'}</span>
+          <ChevronDown className={`h-3 w-3 transition-transform ${isMobileFiltersOpen ? 'rotate-180' : ''}`} />
+        </button>
+      </div>
+
       {/* Top Filter Row: 4 Shared Dropdowns + Single Primary CTA + Secondary Actions Menu */}
-      <div className="flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-2.5">
+      <div className={`flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-2.5 ${isMobileFiltersOpen ? 'block' : 'hidden md:flex'}`}>
         
         {/* 4 Core Selectors */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 flex-1">
+        <div className="grid grid-cols-1 min-[440px]:grid-cols-2 lg:grid-cols-4 gap-2 flex-1">
           {/* 1. Sector */}
           <div className="relative">
             <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5 font-mono flex items-center gap-1">
@@ -230,8 +247,8 @@ export const GlobalFilterBar: React.FC<GlobalFilterBarProps> = ({
           </div>
         </div>
 
-        {/* Action Controls (Strict Rule 7: One Primary CTA + "⋯ Actions" Dropdown) */}
-        <div className="flex items-center gap-2 shrink-0 pt-1 xl:pt-0 justify-end">
+        {/* Action Controls */}
+        <div className="flex flex-wrap items-center gap-2 shrink-0 pt-1 xl:pt-0 justify-end">
           {/* Single Primary Action */}
           <button
             onClick={() => {

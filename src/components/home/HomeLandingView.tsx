@@ -388,6 +388,29 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
     window.addEventListener('mouseup', handleMouseUp);
     currentMount.addEventListener('click', handleClick);
 
+    // Mobile & Tablet Touch Interactions
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 1) {
+        isDragging = true;
+        previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      }
+    };
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!isDragging || e.touches.length !== 1) return;
+      const deltaX = e.touches[0].clientX - previousMousePosition.x;
+      const deltaY = e.touches[0].clientY - previousMousePosition.y;
+      globeGroup.rotation.y += deltaX * 0.005;
+      globeGroup.rotation.x = Math.max(-0.9, Math.min(0.9, globeGroup.rotation.x + deltaY * 0.005));
+      previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    };
+    const handleTouchEnd = () => {
+      isDragging = false;
+    };
+
+    currentMount.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    window.addEventListener('touchend', handleTouchEnd);
+
     // 12. Animation Loop
     let animationFrameId: number;
     const clock = new THREE.Clock();
@@ -424,24 +447,33 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
 
     const handleResize = () => {
       if (!currentMount) return;
-      camera.aspect = currentMount.clientWidth / currentMount.clientHeight;
+      const width = currentMount.clientWidth;
+      const height = currentMount.clientHeight;
+      if (width === 0 || height === 0) return;
+      camera.aspect = width / height;
       camera.updateProjectionMatrix();
-      renderer.setSize(currentMount.clientWidth, currentMount.clientHeight);
+      renderer.setSize(width, height);
     };
 
     window.addEventListener('resize', handleResize);
+    const resizeObserver = new ResizeObserver(() => handleResize());
+    resizeObserver.observe(currentMount);
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      resizeObserver.disconnect();
       if (currentMount) {
         currentMount.removeEventListener('mousedown', handleMouseDown);
         currentMount.removeEventListener('click', handleClick);
+        currentMount.removeEventListener('touchstart', handleTouchStart);
         if (renderer.domElement && currentMount.contains(renderer.domElement)) {
           currentMount.removeChild(renderer.domElement);
         }
       }
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
       cancelAnimationFrame(animationFrameId);
 
       // Dispose Three resources
@@ -523,24 +555,24 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
   ];
 
   return (
-    <div className="space-y-10 max-w-[1600px] mx-auto pb-16 animate-fadeIn relative">
+    <div className="space-y-8 sm:space-y-10 max-w-[1600px] mx-auto pb-16 animate-fadeIn relative">
       
       {/* TOP HEADER WITH SIGN IN / SIGN UP ACTIONS */}
-      <div className="flex items-center justify-between bg-slate-900/90 backdrop-blur-md px-6 py-4 rounded-2xl border border-slate-800 text-white shadow-lg sticky top-0 z-40">
-        <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-[#0A3D62] to-[#F28C28] flex items-center justify-center font-black text-white shadow">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900/90 backdrop-blur-md px-3.5 sm:px-6 py-3 sm:py-4 rounded-xl sm:rounded-2xl border border-slate-800 text-white shadow-lg relative">
+        <div className="flex items-center gap-2.5">
+          <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-gradient-to-br from-[#0A3D62] to-[#F28C28] flex items-center justify-center font-black text-white shadow shrink-0">
             🇮🇳
           </div>
-          <div>
-            <div className="text-xs font-mono font-bold text-[#F28C28]">GOVERNMENT OF INDIA • MSDE</div>
-            <div className="text-sm font-extrabold tracking-tight">Labour Market Intelligence System (LMIS)</div>
+          <div className="min-w-0">
+            <div className="text-[10px] sm:text-xs font-mono font-bold text-[#F28C28] truncate">GOVERNMENT OF INDIA • MSDE</div>
+            <div className="text-xs sm:text-sm font-extrabold tracking-tight truncate">Labour Market Intelligence System (LMIS)</div>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 self-end sm:self-auto">
           <button
             onClick={() => { setAuthModal('signin'); setAuthSuccessMsg(''); }}
-            className="px-4 py-2 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 text-white transition-all cursor-pointer flex items-center gap-2 border border-white/20"
+            className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 text-white transition-all cursor-pointer flex items-center gap-1.5 sm:gap-2 border border-white/20"
           >
             <LogIn className="h-3.5 w-3.5 text-[#38BDF8]" />
             <span>Sign In</span>
@@ -548,7 +580,7 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
 
           <button
             onClick={() => { setAuthModal('signup'); setAuthSuccessMsg(''); }}
-            className="px-4 py-2 rounded-xl text-xs font-bold bg-[#F28C28] hover:bg-[#d97722] text-white transition-all cursor-pointer flex items-center gap-2 shadow"
+            className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-bold bg-[#F28C28] hover:bg-[#d97722] text-white transition-all cursor-pointer flex items-center gap-1.5 sm:gap-2 shadow"
           >
             <UserPlus className="h-3.5 w-3.5" />
             <span>Sign Up</span>
@@ -557,57 +589,57 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
       </div>
 
       {/* 1. HERO SECTION WITH 3D WORLD GLOBE & SCATTERED INDIAN INDUSTRIAL CLUSTERS */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#07243e] via-[#0A3D62] to-[#041627] text-white p-6 sm:p-10 shadow-2xl border border-blue-900/50">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#07243e] via-[#0A3D62] to-[#041627] text-white p-4 sm:p-8 lg:p-10 shadow-2xl border border-blue-900/50">
         
         {/* Background Decorative Grid */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:3rem_3rem] pointer-events-none" />
         
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center relative z-10">
           
           {/* Hero Left Content */}
-          <div className="lg:col-span-7 space-y-6">
+          <div className="lg:col-span-7 space-y-4 sm:space-y-6">
             
             {/* Government Badge */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-mono font-bold text-[#F28C28]">
-              <Award className="h-4 w-4" />
-              <span>MINISTRY OF SKILL DEVELOPMENT & ENTREPRENEURSHIP • GOVT. OF INDIA</span>
+            <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[10px] sm:text-xs font-mono font-bold text-[#F28C28] max-w-full truncate">
+              <Award className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+              <span className="truncate">MINISTRY OF SKILL DEVELOPMENT & ENTREPRENEURSHIP • GOVT. OF INDIA</span>
             </div>
 
-            <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
+            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight">
               {language === 'en' ? 'National Labour & Skill Observatory' : 'राष्ट्रीय श्रम एवं कौशल वेधशाला'}
             </h1>
 
-            <p className="text-slate-200 text-sm sm:text-base leading-relaxed max-w-2xl font-normal">
+            <p className="text-slate-200 text-xs sm:text-sm md:text-base leading-relaxed max-w-2xl font-normal">
               {language === 'en'
                 ? 'High-stakes Bayesian decision support system, real-time vacancy telemetry, and predictive workforce optimization across 22+ key industrial corridors, 742 districts & global mobility corridors.'
                 : 'भारत के 742 जिलों और 38 सेक्टर स्किल काउंसिल को संचालित करने वाला उच्च-स्तरीय बायेसियन निर्णय समर्थन प्रणाली।'}
             </p>
 
             {/* Key Stats Bar */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-1">
-              <div className="bg-white/5 backdrop-blur-md p-3.5 rounded-xl border border-white/10">
-                <div className="text-2xl sm:text-3xl font-black text-[#F28C28] font-mono">4.82M</div>
-                <div className="text-[11px] text-slate-300 uppercase font-medium mt-0.5">Live Active Vacancies</div>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 pt-1">
+              <div className="bg-white/5 backdrop-blur-md p-3 sm:p-3.5 rounded-xl border border-white/10">
+                <div className="text-xl sm:text-2xl lg:text-3xl font-black text-[#F28C28] font-mono">4.82M</div>
+                <div className="text-[10px] sm:text-[11px] text-slate-300 uppercase font-medium mt-0.5">Live Vacancies</div>
               </div>
-              <div className="bg-white/5 backdrop-blur-md p-3.5 rounded-xl border border-white/10">
-                <div className="text-2xl sm:text-3xl font-black text-white font-mono">22+</div>
-                <div className="text-[11px] text-slate-300 uppercase font-medium mt-0.5">Industrial Corridors</div>
+              <div className="bg-white/5 backdrop-blur-md p-3 sm:p-3.5 rounded-xl border border-white/10">
+                <div className="text-xl sm:text-2xl lg:text-3xl font-black text-white font-mono">22+</div>
+                <div className="text-[10px] sm:text-[11px] text-slate-300 uppercase font-medium mt-0.5">Corridors</div>
               </div>
-              <div className="bg-white/5 backdrop-blur-md p-3.5 rounded-xl border border-white/10">
-                <div className="text-2xl sm:text-3xl font-black text-[#38BDF8] font-mono">14</div>
-                <div className="text-[11px] text-slate-300 uppercase font-medium mt-0.5">Global Partner Nations</div>
+              <div className="bg-white/5 backdrop-blur-md p-3 sm:p-3.5 rounded-xl border border-white/10">
+                <div className="text-xl sm:text-2xl lg:text-3xl font-black text-[#38BDF8] font-mono">14</div>
+                <div className="text-[10px] sm:text-[11px] text-slate-300 uppercase font-medium mt-0.5">Partner Nations</div>
               </div>
-              <div className="bg-white/5 backdrop-blur-md p-3.5 rounded-xl border border-white/10">
-                <div className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono">99.4%</div>
-                <div className="text-[11px] text-slate-300 uppercase font-medium mt-0.5">Bayesian Accuracy</div>
+              <div className="bg-white/5 backdrop-blur-md p-3 sm:p-3.5 rounded-xl border border-white/10">
+                <div className="text-xl sm:text-2xl lg:text-3xl font-black text-emerald-400 font-mono">99.4%</div>
+                <div className="text-[10px] sm:text-[11px] text-slate-300 uppercase font-medium mt-0.5">Accuracy</div>
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-wrap items-center gap-3.5 pt-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3.5 pt-2">
               <button
                 onClick={() => onNavigateTab('mission')}
-                className="flex items-center gap-2 px-6 py-3.5 rounded-xl text-xs sm:text-sm font-extrabold bg-[#F28C28] text-white hover:bg-[#d97722] shadow-lg transition-all cursor-pointer transform hover:-translate-y-0.5"
+                className="flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-xl text-xs sm:text-sm font-extrabold bg-[#F28C28] text-white hover:bg-[#d97722] shadow-lg transition-all cursor-pointer transform hover:-translate-y-0.5"
               >
                 <span>Launch National Cockpit</span>
                 <ArrowRight className="h-4 w-4" />
@@ -615,7 +647,7 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
 
               <button
                 onClick={() => { setAuthModal('signin'); }}
-                className="flex items-center gap-2 px-6 py-3.5 rounded-xl text-xs sm:text-sm font-bold bg-white/10 hover:bg-white/20 text-white border border-white/30 backdrop-blur-md transition-all cursor-pointer"
+                className="flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-xl text-xs sm:text-sm font-bold bg-white/10 hover:bg-white/20 text-white border border-white/30 backdrop-blur-md transition-all cursor-pointer"
               >
                 <LogIn className="h-4 w-4 text-[#38BDF8]" />
                 <span>Official Secure Login</span>
@@ -625,11 +657,11 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
           </div>
 
           {/* Hero Right: 3D Interactive World Globe with Countries & Indian Nodes */}
-          <div className="lg:col-span-5 flex flex-col items-center justify-center relative">
+          <div className="lg:col-span-5 flex flex-col items-center justify-center relative w-full">
             
             <div
               ref={mountRef}
-              className="w-full h-[360px] sm:h-[430px] rounded-2xl cursor-grab active:cursor-grabbing relative"
+              className="w-full h-[270px] min-[400px]:h-[310px] sm:h-[390px] md:h-[430px] lg:h-[480px] rounded-2xl cursor-grab active:cursor-grabbing relative"
               title="Interactive 3D World & India Globe - Drag to rotate in 360°, click any country or cluster"
             />
 
@@ -639,15 +671,15 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
                 const hCl = INDIA_INDUSTRIAL_CLUSTERS.find(c => c.id === hoveredClusterId);
                 if (!hCl) return null;
                 return (
-                  <div className="absolute top-3 left-3 right-3 bg-slate-900/95 backdrop-blur-md border border-amber-500/50 px-3.5 py-2.5 rounded-xl shadow-2xl text-white text-xs animate-fadeIn pointer-events-none z-30 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="h-2.5 w-2.5 rounded-full animate-ping" style={{ backgroundColor: hCl.color }} />
-                      <div>
-                        <div className="font-extrabold text-white text-xs">{hCl.name}</div>
-                        <div className="text-slate-400 text-[10px]">{hCl.state} • {hCl.vacancies} Vacancies</div>
+                  <div className="absolute top-2 left-2 right-2 bg-slate-900/95 backdrop-blur-md border border-amber-500/50 px-3 py-2 rounded-xl shadow-2xl text-white text-xs animate-fadeIn pointer-events-none z-30 flex items-center justify-between">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="h-2 w-2 rounded-full animate-ping shrink-0" style={{ backgroundColor: hCl.color }} />
+                      <div className="min-w-0">
+                        <div className="font-extrabold text-white text-xs truncate">{hCl.name}</div>
+                        <div className="text-slate-400 text-[10px] truncate">{hCl.state} • {hCl.vacancies} Vacancies</div>
                       </div>
                     </div>
-                    <span className="font-mono text-[#F28C28] text-[11px] font-bold">Click to open Overlay</span>
+                    <span className="font-mono text-[#F28C28] text-[10px] sm:text-[11px] font-bold shrink-0 ml-2">Click for Overlay</span>
                   </div>
                 );
               })()
@@ -658,23 +690,23 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
                 const hCo = GLOBAL_PARTNER_COUNTRIES.find(c => c.id === hoveredCountryId);
                 if (!hCo) return null;
                 return (
-                  <div className="absolute top-3 left-3 right-3 bg-slate-900/95 backdrop-blur-md border border-cyan-500/50 px-3.5 py-2.5 rounded-xl shadow-2xl text-white text-xs animate-fadeIn pointer-events-none z-30 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-base">{hCo.flag}</span>
-                      <div>
-                        <div className="font-extrabold text-white text-xs">{hCo.name}</div>
-                        <div className="text-slate-300 text-[10px]">{hCo.partnershipType}</div>
+                  <div className="absolute top-2 left-2 right-2 bg-slate-900/95 backdrop-blur-md border border-cyan-500/50 px-3 py-2 rounded-xl shadow-2xl text-white text-xs animate-fadeIn pointer-events-none z-30 flex items-center justify-between">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-base shrink-0">{hCo.flag}</span>
+                      <div className="min-w-0">
+                        <div className="font-extrabold text-white text-xs truncate">{hCo.name}</div>
+                        <div className="text-slate-300 text-[10px] truncate">{hCo.partnershipType}</div>
                       </div>
                     </div>
-                    <span className="font-mono text-[#38BDF8] text-[11px] font-bold">Click for Bilateral Agreement</span>
+                    <span className="font-mono text-[#38BDF8] text-[10px] sm:text-[11px] font-bold shrink-0 ml-2">Bilateral Corridor</span>
                   </div>
                 );
               })()
             )}
 
             {!hoveredClusterId && !hoveredCountryId && !selectedCluster && !selectedCountry && (
-              <div className="absolute bottom-2 text-center text-[10px] font-mono text-slate-300 bg-slate-900/85 backdrop-blur-sm px-3.5 py-1.5 rounded-full border border-slate-700/80 shadow-md">
-                🌐 Drag to rotate globe • Click any Indian cluster or World partner country
+              <div className="absolute bottom-2 text-center text-[10px] font-mono text-slate-300 bg-slate-900/85 backdrop-blur-sm px-3 py-1 rounded-full border border-slate-700/80 shadow-md max-w-[95%] truncate">
+                🌐 Drag to rotate in 360° • Click cluster or partner nation
               </div>
             )}
 
@@ -683,20 +715,20 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
         </div>
 
         {/* REGIONAL FILTER & INDUSTRIAL CLUSTER EXPLORER STRIP */}
-        <div className="mt-8 pt-6 border-t border-white/10 space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-white/10 space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
             <div className="text-xs font-mono font-bold text-[#38BDF8] uppercase tracking-wider flex items-center gap-2">
               <MapPin className="h-4 w-4 text-[#F28C28]" />
               <span>India Industrial Corridors & Global Skilling Partners</span>
             </div>
 
             {/* Region Filter Buttons */}
-            <div className="flex flex-wrap items-center gap-1.5 bg-black/30 p-1 rounded-xl border border-white/10">
+            <div className="flex items-center gap-1.5 bg-black/30 p-1 rounded-xl border border-white/10 overflow-x-auto no-scrollbar">
               {(['All', 'North', 'South', 'West', 'Central', 'North-East', 'Global'] as const).map((r) => (
                 <button
                   key={r}
                   onClick={() => setRegionFilter(r)}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  className={`px-2.5 sm:px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                     regionFilter === r
                       ? 'bg-[#F28C28] text-white shadow'
                       : 'text-slate-300 hover:text-white hover:bg-white/10'
@@ -710,7 +742,7 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
 
           {/* Cards Grid */}
           {regionFilter === 'Global' ? (
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5">
+            <div className="grid grid-cols-1 min-[380px]:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2 sm:gap-2.5">
               {GLOBAL_PARTNER_COUNTRIES.map((country) => (
                 <div
                   key={country.id}
@@ -733,7 +765,7 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+            <div className="grid grid-cols-1 min-[380px]:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-2.5">
               {activeClusters.slice(0, 12).map((cluster) => (
                 <div
                   key={cluster.id}
@@ -762,43 +794,43 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
 
       {/* 2. INDUSTRY CLUSTER OVERLAY MODAL (When an Indian Cluster is clicked) */}
       {selectedCluster && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fadeIn">
-          <div className="bg-white rounded-2xl max-w-3xl w-full shadow-2xl border border-slate-200 overflow-hidden max-h-[90vh] flex flex-col">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-fadeIn">
+          <div className="bg-white rounded-2xl max-w-3xl w-full shadow-2xl border border-slate-200 overflow-hidden max-h-[92vh] flex flex-col mx-2">
             
             {/* Modal Header */}
-            <div className="bg-[#0A3D62] text-white px-6 py-5 flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-3">
+            <div className="bg-[#0A3D62] text-white px-4 sm:px-6 py-3.5 sm:py-5 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
                 <div
-                  className="h-10 w-10 rounded-xl flex items-center justify-center shadow font-black text-white"
+                  className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl flex items-center justify-center shadow font-black text-white shrink-0"
                   style={{ backgroundColor: selectedCluster.color }}
                 >
-                  <MapPin className="h-5 w-5" />
+                  <MapPin className="h-4 w-4 sm:h-5 sm:w-5" />
                 </div>
-                <div>
-                  <div className="text-[10px] font-mono uppercase tracking-widest text-[#F28C28]">
-                    INDUSTRY CLUSTER OVERLAY • {selectedCluster.state} ({selectedCluster.region} Region)
+                <div className="min-w-0">
+                  <div className="text-[9px] sm:text-[10px] font-mono uppercase tracking-widest text-[#F28C28] truncate">
+                    INDUSTRY CLUSTER OVERLAY • {selectedCluster.state}
                   </div>
-                  <h3 className="text-lg sm:text-xl font-black tracking-tight">{selectedCluster.name}</h3>
+                  <h3 className="text-base sm:text-xl font-black tracking-tight truncate">{selectedCluster.name}</h3>
                 </div>
               </div>
               <button
                 onClick={() => setSelectedCluster(null)}
-                className="p-2 rounded-xl hover:bg-white/10 text-slate-300 hover:text-white transition-colors cursor-pointer"
+                className="p-1.5 sm:p-2 rounded-xl hover:bg-white/10 text-slate-300 hover:text-white transition-colors cursor-pointer shrink-0"
               >
-                <X className="h-6 w-6" />
+                <X className="h-5 w-5 sm:h-6 sm:w-6" />
               </button>
             </div>
 
             {/* Modal Body */}
-            <div className="p-6 overflow-y-auto space-y-6 flex-1 text-slate-800">
+            <div className="p-4 sm:p-6 overflow-y-auto space-y-4 sm:space-y-6 flex-1 text-slate-800">
               
               {/* Description */}
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium bg-slate-50 p-4 rounded-xl border border-slate-200/80">
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium bg-slate-50 p-3.5 sm:p-4 rounded-xl border border-slate-200/80">
                 {selectedCluster.description}
               </p>
 
               {/* Key Metrics Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 min-[420px]:grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4">
                 <div className="bg-blue-50/70 border border-blue-200 p-4 rounded-xl">
                   <div className="text-[10px] uppercase font-bold text-[#0A3D62] mb-1 flex items-center gap-1">
                     <Briefcase className="h-3.5 w-3.5" />
@@ -873,10 +905,10 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
             </div>
 
             {/* Modal Footer Actions */}
-            <div className="bg-slate-50 border-t border-slate-200 px-6 py-4 flex items-center justify-between shrink-0">
+            <div className="bg-slate-50 border-t border-slate-200 px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-0 shrink-0">
               <button
                 onClick={() => setSelectedCluster(null)}
-                className="px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                className="px-4 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer text-center"
               >
                 Close Overlay
               </button>
@@ -887,7 +919,7 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
                     setSelectedCluster(null);
                     onNavigateTab('district');
                   }}
-                  className="px-5 py-2.5 rounded-xl bg-[#0A3D62] hover:bg-[#072a44] text-white text-xs font-bold shadow-md transition-all flex items-center gap-2 cursor-pointer"
+                  className="w-full sm:w-auto justify-center px-4 sm:px-5 py-2.5 rounded-xl bg-[#0A3D62] hover:bg-[#072a44] text-white text-xs font-bold shadow-md transition-all flex items-center gap-2 cursor-pointer"
                 >
                   <MapPin className="h-4 w-4 text-[#F28C28]" />
                   <span>Open District War Room</span>
@@ -901,39 +933,39 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
 
       {/* 3. GLOBAL PARTNER COUNTRY OVERLAY MODAL (When a World Partner is clicked) */}
       {selectedCountry && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fadeIn">
-          <div className="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-fadeIn">
+          <div className="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-200 overflow-hidden max-h-[92vh] flex flex-col mx-2">
             
             {/* Modal Header */}
-            <div className="bg-[#07243e] text-white px-6 py-5 flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-3">
-                <span className="text-3xl">{selectedCountry.flag}</span>
-                <div>
-                  <div className="text-[10px] font-mono uppercase tracking-widest text-[#38BDF8]">
+            <div className="bg-[#07243e] text-white px-4 sm:px-6 py-3.5 sm:py-5 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                <span className="text-2xl sm:text-3xl shrink-0">{selectedCountry.flag}</span>
+                <div className="min-w-0">
+                  <div className="text-[9px] sm:text-[10px] font-mono uppercase tracking-widest text-[#38BDF8] truncate">
                     BILATERAL SKILL MOBILITY CORRIDOR • {selectedCountry.continent}
                   </div>
-                  <h3 className="text-lg sm:text-xl font-black tracking-tight">{selectedCountry.name}</h3>
+                  <h3 className="text-base sm:text-xl font-black tracking-tight truncate">{selectedCountry.name}</h3>
                 </div>
               </div>
               <button
                 onClick={() => setSelectedCountry(null)}
-                className="p-2 rounded-xl hover:bg-white/10 text-slate-300 hover:text-white transition-colors cursor-pointer"
+                className="p-1.5 sm:p-2 rounded-xl hover:bg-white/10 text-slate-300 hover:text-white transition-colors cursor-pointer shrink-0"
               >
-                <X className="h-6 w-6" />
+                <X className="h-5 w-5 sm:h-6 sm:w-6" />
               </button>
             </div>
 
             {/* Modal Body */}
-            <div className="p-6 space-y-5 text-slate-800">
-              <div className="bg-blue-50/70 p-4 rounded-xl border border-blue-200">
-                <div className="text-xs font-bold text-[#0A3D62] uppercase tracking-wider mb-1">
+            <div className="p-4 sm:p-6 space-y-4 sm:space-y-5 text-slate-800 overflow-y-auto flex-1">
+              <div className="bg-blue-50/70 p-3.5 sm:p-4 rounded-xl border border-blue-200">
+                <div className="text-[11px] sm:text-xs font-bold text-[#0A3D62] uppercase tracking-wider mb-1">
                   Partnership Framework
                 </div>
-                <div className="text-sm font-extrabold text-slate-900">{selectedCountry.partnershipType}</div>
+                <div className="text-xs sm:text-sm font-extrabold text-slate-900">{selectedCountry.partnershipType}</div>
                 <div className="text-xs text-emerald-700 font-bold mt-1 font-mono">{selectedCountry.talentDemand}</div>
               </div>
 
-              <p className="text-xs text-slate-600 leading-relaxed font-medium">
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
                 {selectedCountry.description}
               </p>
 
@@ -942,9 +974,9 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
                   <Compass className="h-4 w-4 text-[#F28C28]" />
                   <span>Key Reciprocal Skill Disciplines</span>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5 sm:gap-2">
                   {selectedCountry.keySectors.map((sector, i) => (
-                    <span key={i} className="px-3 py-1.5 bg-slate-100 border border-slate-200 rounded-lg text-xs font-bold text-slate-700">
+                    <span key={i} className="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-slate-100 border border-slate-200 rounded-lg text-xs font-bold text-slate-700">
                       {sector}
                     </span>
                   ))}
@@ -953,10 +985,10 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
             </div>
 
             {/* Modal Footer */}
-            <div className="bg-slate-50 border-t border-slate-200 px-6 py-4 flex items-center justify-between shrink-0">
+            <div className="bg-slate-50 border-t border-slate-200 px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-0 shrink-0">
               <button
                 onClick={() => setSelectedCountry(null)}
-                className="px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                className="px-4 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer text-center"
               >
                 Close Partner View
               </button>
@@ -966,7 +998,7 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
                   setSelectedCountry(null);
                   onNavigateTab('sector');
                 }}
-                className="px-5 py-2.5 rounded-xl bg-[#0A3D62] hover:bg-[#072a44] text-white text-xs font-bold shadow-md transition-all flex items-center gap-2 cursor-pointer"
+                className="w-full sm:w-auto justify-center px-4 sm:px-5 py-2.5 rounded-xl bg-[#0A3D62] hover:bg-[#072a44] text-white text-xs font-bold shadow-md transition-all flex items-center gap-2 cursor-pointer"
               >
                 <Plane className="h-4 w-4 text-[#38BDF8]" />
                 <span>View Sector Mobility Council</span>
@@ -1079,34 +1111,34 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
 
       {/* AUTH MODAL (SIGN IN / SIGN UP) */}
       {authModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/70 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden max-h-[92vh] overflow-y-auto mx-2">
             
             {/* Header */}
-            <div className="bg-[#0A3D62] text-white px-6 py-4 flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-white/10 rounded-lg">
-                  {authModal === 'signin' ? <LogIn className="h-5 w-5 text-[#F28C28]" /> : <UserPlus className="h-5 w-5 text-[#38BDF8]" />}
+            <div className="bg-[#0A3D62] text-white px-4 sm:px-6 py-3.5 sm:py-4 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+                <div className="p-1.5 sm:p-2 bg-white/10 rounded-lg shrink-0">
+                  {authModal === 'signin' ? <LogIn className="h-4 w-4 sm:h-5 sm:w-5 text-[#F28C28]" /> : <UserPlus className="h-4 w-4 sm:h-5 sm:w-5 text-[#38BDF8]" />}
                 </div>
-                <div>
-                  <h3 className="text-base font-black">
+                <div className="min-w-0">
+                  <h3 className="text-sm sm:text-base font-black truncate">
                     {authModal === 'signin' ? 'Government Secure Sign In' : 'Provision New Account (Gov-Net)'}
                   </h3>
-                  <p className="text-[11px] text-slate-300">Ministry of Skill Development & Entrepreneurship</p>
+                  <p className="text-[10px] sm:text-[11px] text-slate-300 truncate">Ministry of Skill Development & Entrepreneurship</p>
                 </div>
               </div>
               <button
                 onClick={() => setAuthModal(null)}
-                className="p-1.5 rounded-lg hover:bg-white/10 text-slate-300 hover:text-white transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg hover:bg-white/10 text-slate-300 hover:text-white transition-colors cursor-pointer shrink-0"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             {/* Form */}
-            <form onSubmit={handleAuthSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleAuthSubmit} className="p-4 sm:p-6 space-y-3.5 sm:space-y-4">
               {authSuccessMsg && (
-                <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2">
+                <div className="p-3 sm:p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2">
                   <Check className="h-4 w-4 shrink-0 text-emerald-600" />
                   <span>{authSuccessMsg}</span>
                 </div>

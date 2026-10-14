@@ -268,7 +268,7 @@ export const AiPolicyCopilot: React.FC<AiPolicyCopilotProps> = ({
     <div
       className={`flex flex-col bg-white border border-slate-200 shadow-xl overflow-hidden transition-all ${
         isFloating
-          ? 'fixed bottom-4 right-4 z-50 w-96 sm:w-[480px] h-[580px] rounded-2xl ring-1 ring-slate-900/10'
+          ? 'fixed inset-x-2 bottom-2 sm:inset-x-auto sm:bottom-4 sm:right-4 z-50 w-auto sm:w-[460px] md:w-[480px] max-w-[calc(100vw-16px)] h-[85vh] sm:h-[580px] rounded-2xl ring-1 ring-slate-900/10'
           : 'w-full h-full min-h-[640px] rounded-xl'
       }`}
     >

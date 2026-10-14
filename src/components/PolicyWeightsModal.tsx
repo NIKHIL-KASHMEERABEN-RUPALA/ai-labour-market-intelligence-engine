@@ -77,34 +77,34 @@ export const PolicyWeightsModal: React.FC<PolicyWeightsModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto">
-      <div className="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden my-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-2 sm:p-4 overflow-y-auto">
+      <div className="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden my-4 sm:my-8 mx-2">
         
         {/* Header */}
-        <div className="bg-[#071E3D] text-white p-5 flex items-start justify-between">
-          <div>
-            <div className="flex items-center gap-2 text-xs font-mono text-blue-300 uppercase tracking-wider">
-              <SlidersHorizontal className="h-4 w-4" />
-              <span>Bayesian Model Config</span>
+        <div className="bg-[#071E3D] text-white p-4 sm:p-5 flex items-start justify-between">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 text-xs font-mono text-blue-300 uppercase tracking-wider truncate">
+              <SlidersHorizontal className="h-4 w-4 shrink-0" />
+              <span className="truncate">Bayesian Model Config</span>
             </div>
-            <h2 className="text-lg font-extrabold mt-1 text-white">
+            <h2 className="text-base sm:text-lg font-extrabold mt-1 text-white truncate">
               {t.title}
             </h2>
-            <p className="text-xs text-slate-300 mt-0.5">
+            <p className="text-xs text-slate-300 mt-0.5 truncate">
               {t.subtitle}
             </p>
           </div>
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
+            className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors shrink-0 ml-2"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Sliders Container */}
-        <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+        <div className="p-4 sm:p-6 space-y-4 max-h-[70vh] overflow-y-auto">
           
           {/* Total Weight Status */}
           <div className={`p-3 rounded-xl border flex items-center justify-between text-xs font-bold ${
@@ -210,19 +210,19 @@ export const PolicyWeightsModal: React.FC<PolicyWeightsModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="bg-slate-50 border-t border-slate-200 p-4 flex items-center justify-between">
+        <div className="bg-slate-50 border-t border-slate-200 p-3 sm:p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-0">
           <button
             onClick={handleReset}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-200 transition-colors"
+            className="flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-200 transition-colors"
           >
             <RotateCcw className="h-3.5 w-3.5" />
             <span>{t.resetBtn}</span>
           </button>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 justify-end">
             <button
               onClick={onClose}
-              className="px-3 py-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-200 transition-colors"
+              className="flex-1 sm:flex-initial px-3 py-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-200 transition-colors text-center"
             >
               {t.close}
             </button>
@@ -231,7 +231,7 @@ export const PolicyWeightsModal: React.FC<PolicyWeightsModalProps> = ({
                 onSaveWeights(weights);
                 onClose();
               }}
-              className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold bg-[#0A3D62] hover:bg-[#072c47] text-white rounded-lg shadow-xs transition-colors cursor-pointer"
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-bold bg-[#0A3D62] hover:bg-[#072c47] text-white rounded-lg shadow-xs transition-colors cursor-pointer"
             >
               <Check className="h-3.5 w-3.5 text-blue-300" />
               <span>{t.saveBtn}</span>

@@ -54,25 +54,26 @@ export const CabinetNoteModal: React.FC<CabinetNoteModalProps> = ({
   const t = dict[language === 'hi' ? 'hi' : 'en'];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs p-4 overflow-y-auto">
-      <div className="relative w-full max-w-3xl bg-white rounded-xl shadow-2xl border border-slate-300 overflow-hidden my-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs p-2 sm:p-4 overflow-y-auto">
+      <div className="relative w-full max-w-3xl bg-white rounded-xl shadow-2xl border border-slate-300 overflow-hidden my-4 sm:my-6 mx-2">
         
         {/* Top Control Bar */}
-        <div className="bg-[#071E3D] text-white px-5 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <FileText className="h-4 w-4 text-amber-300" />
-            <span className="text-xs font-bold uppercase tracking-wider">
-              Official Cabinet Secretariat Document
+        <div className="bg-[#071E3D] text-white px-3 sm:px-5 py-2.5 sm:py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2 min-w-0">
+            <FileText className="h-4 w-4 text-amber-300 shrink-0" />
+            <span className="text-xs font-bold uppercase tracking-wider truncate">
+              Official Cabinet Document
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={onPrint}
-              className="flex items-center gap-1.5 px-3 py-1 bg-white/10 hover:bg-white/20 text-white rounded text-xs font-bold transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 bg-white/10 hover:bg-white/20 text-white rounded text-xs font-bold transition-colors cursor-pointer"
             >
               <Printer className="h-3.5 w-3.5 text-blue-300" />
-              <span>{t.printBtn}</span>
+              <span className="hidden sm:inline">{t.printBtn}</span>
+              <span className="sm:hidden">PDF</span>
             </button>
             <button
               onClick={onClose}
@@ -83,8 +84,8 @@ export const CabinetNoteModal: React.FC<CabinetNoteModalProps> = ({
           </div>
         </div>
 
-        {/* Official Document Body (Formatted like an authentic Government of India Cabinet Note) */}
-        <div className="p-8 sm:p-10 space-y-6 max-h-[80vh] overflow-y-auto text-slate-900 font-serif leading-relaxed">
+        {/* Official Document Body */}
+        <div className="p-4 sm:p-8 lg:p-10 space-y-4 sm:space-y-6 max-h-[80vh] overflow-y-auto text-slate-900 font-serif leading-relaxed">
           
           {/* Secret Header Stamp */}
           <div className="text-center border-b-2 border-red-700 pb-2">
