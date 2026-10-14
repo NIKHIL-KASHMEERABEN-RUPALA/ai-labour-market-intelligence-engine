@@ -61,7 +61,7 @@ export interface DashboardState {
 function getInitialFromUrl() {
   if (typeof window === 'undefined') {
     return {
-      tab: 'mission',
+      tab: 'home',
       sector: 'all',
       horizon: '12m' as TimeHorizon,
       geo: 'all',
@@ -74,7 +74,7 @@ function getInitialFromUrl() {
 
   const params = new URLSearchParams(window.location.search);
   return {
-    tab: params.get('tab') || 'mission',
+    tab: params.get('tab') || 'home',
     sector: params.get('sector') || 'all',
     horizon: (params.get('horizon') as TimeHorizon) || '12m',
     geo: params.get('geo') || 'all',

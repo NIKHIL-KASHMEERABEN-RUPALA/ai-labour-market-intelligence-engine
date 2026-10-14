@@ -17,6 +17,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ExternalLink,
+  Globe,
 } from 'lucide-react';
 import { Language } from '../types';
 

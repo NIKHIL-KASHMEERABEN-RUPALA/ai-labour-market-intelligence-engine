@@ -20,6 +20,7 @@ import { HelpMethodologyView } from './components/help/HelpMethodologyView';
 import { TalentComparisonView } from './components/talent/TalentComparisonView';
 import { CommandPaletteModal } from './components/CommandPaletteModal';
 import { AiPolicyCopilot } from './components/copilot/AiPolicyCopilot';
+import { HomeLandingView } from './components/home/HomeLandingView';
 import { ApiExplorerView } from './components/api/ApiExplorerView';
 import { SettingsAccessibilityView } from './components/settings/SettingsAccessibilityView';
 import { BottomStatusBar } from './components/BottomStatusBar';
@@ -172,27 +173,38 @@ export default function App() {
       <div className="flex-1 flex w-full">
         
         {/* 2. Left MSDE Sidebar */}
-        <div className="hidden lg:block shrink-0">
-          <Sidebar
-            language={language}
-            activeTab={activeSidebarTab}
-            onTabChange={(tabId) => setActiveSidebarTab(tabId)}
-          />
-        </div>
+        {activeSidebarTab !== 'home' && (
+          <div className="hidden lg:block shrink-0">
+            <Sidebar
+              language={language}
+              activeTab={activeSidebarTab}
+              onTabChange={(tabId) => setActiveSidebarTab(tabId)}
+            />
+          </div>
+        )}
 
         {/* 3. Main Content Viewport */}
         <main className="flex-1 p-3 sm:p-5 max-w-[1600px] mx-auto space-y-3.5 w-full">
           
           {/* Global Header Filter Bar (Affects EVERY page, shareable URL state, live recomputations) */}
-          <GlobalFilterBar
-            language={language}
-            onExportBrief={handleExportBrief}
-            onGenerateCabinetNote={() => setShowCabinetNote(true)}
-            onOpenPolicyWeights={() => setShowPolicyWeights(true)}
-          />
+          {activeSidebarTab !== 'home' && (
+            <GlobalFilterBar
+              language={language}
+              onExportBrief={handleExportBrief}
+              onGenerateCabinetNote={() => setShowCabinetNote(true)}
+              onOpenPolicyWeights={() => setShowPolicyWeights(true)}
+            />
+          )}
 
           {/* Conditional Page Views */}
-          {activeSidebarTab === 'mission' ? (
+          {activeSidebarTab === 'home' ? (
+            <HomeLandingView
+              language={language}
+              onNavigateTab={(tabId) => setActiveSidebarTab(tabId)}
+              onOpenCabinetNote={() => setShowCabinetNote(true)}
+              onExportBrief={handleExportBrief}
+            />
+          ) : activeSidebarTab === 'mission' ? (
             <MissionCockpitView
               language={language}
               onOpenActionPlan={(item) => setSelectedWarning(item)}
