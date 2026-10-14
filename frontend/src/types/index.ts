@@ -415,6 +415,32 @@ export interface CrossSectorHeatmapCell {
   exposureCrores: number;
   imbalanceScore: number; // e.g. -45 to +60
 }
+export interface HistoricalSkillPlacementPoint {
+  id: string;
+  sectorId: string;
+  sectorName: string;
+  sectorNameHi: string;
+  cluster: string;
+  clusterHi: string;
+  state: string;
+  period: string;
+  year: number;
+  quarter: string;
+  skillDemand: number;
+  actualPlacement: number;
+  placementRate: number;
+  placementGap: number;
+  conversionLagDays: number;
+  sampleSizeEmployers: number;
+  accuracyCategory: 'optimal_absorption' | 'moderate_shortfall' | 'severe_shortfall' | 'placement_surplus';
+  color: string;
+}
 
-
-
+export interface HistoricalScatterSectorMeta {
+  id: string;
+  name: string;
+  nameHi: string;
+  color: string;
+  badgeColor?: string;
+  leadCluster?: string;
+}
