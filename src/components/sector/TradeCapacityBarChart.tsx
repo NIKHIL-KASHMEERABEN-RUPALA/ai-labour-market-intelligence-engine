@@ -7,13 +7,17 @@ import { AlertCircle, Clock, CheckCircle2 } from 'lucide-react';
 interface TradeCapacityBarChartProps {
   language: Language;
   onTradeClick?: (trade: TradeCapacityData) => void;
+  trades?: TradeCapacityData[];
 }
 
 export const TradeCapacityBarChart: React.FC<TradeCapacityBarChartProps> = ({
   language,
   onTradeClick,
+  trades: customTrades,
 }) => {
-  const maxVal = 190000; // max value for bar scale
+  const activeTrades = customTrades || SECTOR_TRADES_CAPACITY;
+  const computedMax = Math.max(...activeTrades.map((t) => Math.max(t.currentCapacity, t.projectedDemand)), 100000);
+  const maxVal = Math.round(computedMax * 1.1);
 
   const dict = {
     en: {
@@ -23,7 +27,7 @@ export const TradeCapacityBarChart: React.FC<TradeCapacityBarChartProps> = ({
       projectedDemand: 'Projected Industry Demand',
       deficit: 'Deficit Gap',
       surplus: 'Balanced / Surplus',
-      summaryDeficit: 'Severe deficit in 6 of 7 core trades',
+      summaryDeficit: 'Severe deficit in core industrial trades',
       leadTimeAvg: 'Average curriculum recalibration lead time: 16.8 weeks',
       leadTime: 'Lead Time',
       nsqf: 'NSQF Level',
@@ -35,7 +39,7 @@ export const TradeCapacityBarChart: React.FC<TradeCapacityBarChartProps> = ({
       projectedDemand: 'अनुमानित उद्योग मांग',
       deficit: 'कमी अंतराल',
       surplus: 'संतुलित / अधिशेष',
-      summaryDeficit: '7 में से 6 मुख्य ट्रेडों में गंभीर कमी',
+      summaryDeficit: 'प्रमुख व्यवसायों में गंभीर कमी',
       leadTimeAvg: 'औसत पाठ्यक्रम पुनर्मूल्यांकन लीड समय: 16.8 सप्ताह',
       leadTime: 'लीड समय',
       nsqf: 'एनएसक्यूएफ स्तर',
@@ -71,7 +75,7 @@ export const TradeCapacityBarChart: React.FC<TradeCapacityBarChartProps> = ({
 
       {/* Trades Bars List */}
       <div className="space-y-4 pt-4">
-        {SECTOR_TRADES_CAPACITY.map((trade) => {
+        {activeTrades.map((trade) => {
           const capPercent = (trade.currentCapacity / maxVal) * 100;
           const demandPercent = (trade.projectedDemand / maxVal) * 100;
           const isDeficit = trade.netGap < 0;

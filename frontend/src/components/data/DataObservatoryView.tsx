@@ -1,432 +1,475 @@
 import React, { useState, useEffect } from 'react';
+import { useObservatoryStore } from '../../stores/observatoryStore';
+import { ObservatoryMetricsStrip } from './observatory/ObservatoryMetricsStrip';
+import { PipelineStageCard } from './observatory/PipelineStageCard';
+import { RegistryHealthCard } from './observatory/RegistryHealthCard';
+import { IngestionLogTable } from './observatory/IngestionLogTable';
+import { CompliancePanel } from './observatory/CompliancePanel';
+import { RegistryDetailDrawer } from './observatory/RegistryDetailDrawer';
+import { CryptoVerificationModal } from './observatory/CryptoVerificationModal';
+import { Language } from '../../types';
 import {
   Database,
   RefreshCw,
-  CheckCircle2,
-  AlertTriangle,
-  Server,
-  Activity,
-  Layers,
-  ArrowRight,
   ShieldCheck,
-  Zap,
-  Globe,
-  Radio,
-  Clock,
+  CheckCircle2,
+  Lock,
   Download,
+  FileText,
+  Key,
+  Layers,
+  Activity,
+  ArrowRight,
+  ExternalLink,
+  Sigma,
+  Radio,
+  Sliders,
+  Check,
+  X,
+  FileCheck,
+  Copy,
 } from 'lucide-react';
-import { Language } from '../../types';
-import { formatIndianNumber } from '../../utils/formatters';
 
 interface DataObservatoryViewProps {
-  language: Language;
-  onNavigateHome: () => void;
-  onShowToast: (title: string, message: string, type?: 'success' | 'info' | 'warning') => void;
-}
-
-interface IngestionPipeline {
-  id: string;
-  name: string;
-  agency: string;
-  recordCount: string;
-  latencyMs: number;
-  cadence: string;
-  status: 'Online' | 'Synchronizing' | 'Lagging';
-  protocol: string;
-  healthPct: number;
+  language?: Language;
+  onNavigateHome?: () => void;
+  onShowToast: (title: string, message: string, type?: 'success' | 'info' | 'warning' | 'error') => void;
 }
 
 export const DataObservatoryView: React.FC<DataObservatoryViewProps> = ({
-  language,
+  language = 'en',
   onNavigateHome,
   onShowToast,
 }) => {
-  const [isSyncingAll, setIsSyncingAll] = useState(false);
-  const [activeTab, setActiveTab] = useState<'pipelines' | 'stream' | 'provenance'>('pipelines');
-  const [liveStreamEvents, setLiveStreamEvents] = useState([
-    {
-      id: 'e1',
-      time: '14:42:01 IST',
-      source: 'e-Shram Portal API',
-      event: 'Ingested 14,800 migrant worker profile updates from Pune district',
-      type: 'ingest',
-    },
-    {
-      id: 'e2',
-      time: '14:41:48 IST',
-      source: 'EPFO Monthly Filing',
-      event: 'Added 48,200 new formal payroll registrations in Automotive & Capital Goods',
-      type: 'payroll',
-    },
-    {
-      id: 'e3',
-      time: '14:41:22 IST',
-      source: 'National Career Service',
-      event: 'Parsed 3,420 acute vacancies for 5-Axis CNC Operator across Maharashtra & Gujarat',
-      type: 'demand',
-    },
-    {
-      id: 'e4',
-      time: '14:40:55 IST',
-      source: 'NCVET SID Platform',
-      event: 'Certified 1,280 candidates under NSQF Level 5 (Mechatronics & EV Powertrain)',
-      type: 'supply',
-    },
-    {
-      id: 'e5',
-      time: '14:40:19 IST',
-      source: 'Naukri.com Real-time Feed',
-      event: 'Scraped 18,500 active job postings in Electronics ESDM & Clean Energy',
-      type: 'market',
-    },
-  ]);
+  const registries = useObservatoryStore((s) => s.registries);
+  const stages = useObservatoryStore((s) => s.stages);
+  const ledgerEvents = useObservatoryStore((s) => s.ledgerEvents);
+  const kpis = useObservatoryStore((s) => s.kpis);
+  const selectedRegistry = useObservatoryStore((s) => s.selectedRegistry);
+  const isDetailDrawerOpen = useObservatoryStore((s) => s.isDetailDrawerOpen);
+  const isCryptoModalOpen = useObservatoryStore((s) => s.isCryptoModalOpen);
+  const isGlobalSyncing = useObservatoryStore((s) => s.isGlobalSyncing);
+  const lastAuditAgo = useObservatoryStore((s) => s.lastAuditAgo);
 
-  const pipelines: IngestionPipeline[] = [
-    {
-      id: 'p1',
-      name: 'e-Shram National Database',
-      agency: 'Ministry of Labour & Employment (MoLE)',
-      recordCount: '302,400,000 Workers',
-      latencyMs: 142,
-      cadence: 'Continuous Webhook',
-      status: 'Online',
-      protocol: 'REST / TLS 1.3 + Aadhaar Hash',
-      healthPct: 99.98,
-    },
-    {
-      id: 'p2',
-      name: 'EPFO Active Payroll Data',
-      agency: 'Employees Provident Fund Organisation',
-      recordCount: '68,240,000 Accounts',
-      latencyMs: 210,
-      cadence: 'Hourly Batch Ingestion',
-      status: 'Online',
-      protocol: 'SFTP / Encrypted Parquet',
-      healthPct: 99.95,
-    },
-    {
-      id: 'p3',
-      name: 'National Career Service (NCS)',
-      agency: 'Directorate General of Employment (DGE)',
-      recordCount: '14,280,000 Active Vacancies',
-      latencyMs: 88,
-      cadence: 'Streaming Kafka Queue',
-      status: 'Online',
-      protocol: 'Apache Kafka / Avro',
-      healthPct: 100.0,
-    },
-    {
-      id: 'p4',
-      name: 'Skill India Digital Hub (SIDH)',
-      agency: 'NCVET & NSDC Ecosystem',
-      recordCount: '41,850,000 Candidate Logs',
-      latencyMs: 165,
-      cadence: 'Real-time Assessment Webhook',
-      status: 'Online',
-      protocol: 'GraphQL / OAuth 2.0 mTLS',
-      healthPct: 99.92,
-    },
-    {
-      id: 'p5',
-      name: 'Periodic Labour Force Survey (PLFS)',
-      agency: 'MoSPI (National Statistical Office)',
-      recordCount: 'Quarterly Unit-Level Records',
-      latencyMs: 420,
-      cadence: 'Quarterly Microdata Extract',
-      status: 'Online',
-      protocol: 'Stata DTA / API Proxy',
-      healthPct: 99.8,
-    },
-    {
-      id: 'p6',
-      name: 'Private Industry Job Portals Aggregator',
-      agency: 'Leading Employer Platforms (Naukri, Indeed, LinkedIn)',
-      recordCount: '4,820,000 Active Postings',
-      latencyMs: 310,
-      cadence: '6-Hour Automated Crawler',
-      status: 'Online',
-      protocol: 'Distributed Headless Crawlers',
-      healthPct: 99.7,
-    },
-  ];
+  const selectRegistry = useObservatoryStore((s) => s.selectRegistry);
+  const setIsDetailDrawerOpen = useObservatoryStore((s) => s.setIsDetailDrawerOpen);
+  const setIsCryptoModalOpen = useObservatoryStore((s) => s.setIsCryptoModalOpen);
+  const forceSyncAll = useObservatoryStore((s) => s.forceSyncAll);
+  const forceSyncRegistry = useObservatoryStore((s) => s.forceSyncRegistry);
+  const togglePauseRegistry = useObservatoryStore((s) => s.togglePauseRegistry);
+  const addSimulatedLedgerEvent = useObservatoryStore((s) => s.addSimulatedLedgerEvent);
 
-  const handleForceSync = () => {
-    setIsSyncingAll(true);
-    onShowToast(
-      language === 'en' ? 'Synchronizing All 6 Ingestion Pipelines' : 'सभी 6 अंतर्ग्रहण पाइपलाइन सिंक्रोनाइज़ हो रही हैं',
-      language === 'en'
-        ? 'Querying NIC Government Cloud and verifying cryptographic checksums...'
-        : 'एनआईसी क्लाउड से डेटा सत्यापित किया जा रहा है...',
-      'info'
-    );
+  const [showComplianceModal, setShowComplianceModal] = useState(false);
+  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
+  const [apiKey, setApiKey] = useState('lmis_gov_live_sec_89f02c184a29e10d8');
+  const [isCopiedKey, setIsCopiedKey] = useState(false);
 
+  // Handle Full Sync Click
+  const handleForceFullSync = async () => {
+    onShowToast('Pipeline Synchronization In Progress', 'Broadcasting refresh signal to all 9 registries...', 'info');
+    await forceSyncAll();
+    onShowToast('All 9 Registries Synced', 'Telemetry volume updated with live ledger additions.', 'success');
+  };
+
+  // Handle Feed Simulator
+  const handleFeedSimulator = () => {
+    addSimulatedLedgerEvent();
+    onShowToast('Telemetry Stream Packet Ingested', 'Simulated 14,800 worker & employer vacancy records.', 'info');
+  };
+
+  // Handle Export CSV
+  const handleExportCsv = () => {
+    const headers = ['Timestamp', 'Feed Source', 'Record Count', 'SHA-256 Checksum', 'Pipeline Status'];
+    const rows = ledgerEvents.map((e) => [
+      `"${e.timestamp}"`,
+      `"${e.feedSource}"`,
+      e.recordCount,
+      `"${e.sha256}"`,
+      `"${e.status}"`,
+    ]);
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const encoded = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encoded);
+    link.setAttribute('download', `LMIS_Observatory_Ledger_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    onShowToast('CSV Downloaded', 'Audit ledger records exported successfully.', 'success');
+  };
+
+  // Handle Export PDF
+  const handleExportPdf = () => {
+    onShowToast('Compiling Quality Report', 'Generating authenticated PDF MSDE-DATA-OBSERVATORY-Q3-2026.pdf...', 'info');
     setTimeout(() => {
-      setIsSyncingAll(false);
-      setLiveStreamEvents((prev) => [
-        {
-          id: `e-${Date.now()}`,
-          time: new Date().toLocaleTimeString('en-GB') + ' IST',
-          source: 'System Ingestion Orchestrator',
-          event: 'Synchronized 42,800 fresh telemetry records across 38 Sector Skill Councils',
-          type: 'ingest',
-        },
-        ...prev.slice(0, 5),
-      ]);
-      onShowToast(
-        language === 'en' ? 'All Pipelines Synchronized (99.98% Health)' : 'सभी पाइपलाइन समकालिक (99.98% स्वास्थ्य)',
-        language === 'en'
-          ? 'Zero packet drop. Econometric models updated with latest employment pulses.'
-          : 'शून्य पैकेट ड्रॉप। अर्थमितीय मॉडल अद्यतन किए गए।',
-        'success'
-      );
-    }, 1400);
+      onShowToast('Report Ready', 'Data Quality and Registry Verification PDF prepared.', 'success');
+    }, 1200);
+  };
+
+  // Handle Download Whitepaper
+  const handleDownloadWhitepaper = () => {
+    onShowToast('Downloading Whitepaper', 'LMIS_National_Data_Architecture_v3.pdf downloaded.', 'success');
   };
 
   return (
-    <div className="space-y-4">
-      {/* Top Header */}
-      <div className="bg-white rounded-xl shadow-xs border border-slate-200/90 p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+    <div className="space-y-4 sm:space-y-5 animate-fadeIn pb-12">
+      {/* 1. PAGE HEADER */}
+      <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-2xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        {/* Left Title & Breadcrumbs */}
         <div>
-          <div className="flex items-center gap-2 text-[11px] font-semibold text-slate-500 mb-1">
-            <span className="hover:text-slate-900 cursor-pointer" onClick={onNavigateHome}>
-              LMIS 2.0
+          {/* Top Metadata Pill Row */}
+          <div className="flex items-center gap-2 flex-wrap mb-1.5 font-mono text-[10px]">
+            <span className="px-2 py-0.5 rounded bg-slate-900 text-white font-bold tracking-wider">
+              ISO/IEC 27001 : 2022
             </span>
-            <span>/</span>
-            <span>National Infrastructure</span>
-            <span>/</span>
-            <span className="text-[#0A3D62] font-bold">Data Observatory</span>
+            <span className="text-slate-400">•</span>
+            <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-bold border border-blue-200">
+              UNIFIED REGISTRY SYNC
+            </span>
+            <span className="text-slate-400">•</span>
+            <span className="text-slate-600 font-semibold">Latency: &lt; 42ms</span>
+            <span className="text-slate-400">•</span>
+            <span className="text-emerald-700 font-bold flex items-center gap-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Nodes Protected: 14 / 14
+            </span>
           </div>
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-blue-50 text-[#0A3D62] rounded-lg">
-              <Database className="h-5 w-5" />
-            </div>
-            <div>
-              <h1 className="text-lg font-black text-slate-900 tracking-tight leading-tight">
-                {language === 'en' ? 'Data Observatory & Live Ingestion Pipelines' : 'डेटा वेधशाला एवं लाइव अंतर्ग्रहण पाइपलाइन्स'}
-              </h1>
-              <p className="text-xs text-slate-500">
-                {language === 'en'
-                  ? 'Real-time telemetry monitor across e-Shram, EPFO, NCS, NCVET, and private hiring indices'
-                  : 'ई-श्रम, ईपीएफओ, एनसीएस और एनसीवीईटी में वास्तविक समय टेलीमेट्री मॉनिटर'}
-              </p>
-            </div>
-          </div>
+
+          <h1 className="text-2xl sm:text-3xl font-black text-[#0B1F3A] tracking-tight">
+            National Skill Data Observatory & Ingestion Pipeline
+          </h1>
+
+          <p className="mt-1 text-xs sm:text-sm text-slate-600 font-medium flex items-center gap-2 flex-wrap">
+            <span>Verified registry synchronization under MSDE Data Governance Framework</span>
+            <span className="text-slate-300">•</span>
+            <span className="font-mono text-emerald-700 font-bold">Real-time SLA: 99.98%</span>
+          </p>
         </div>
 
-        <div className="flex items-center gap-2 self-end md:self-auto">
+        {/* Right Header Action Buttons */}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 shrink-0">
+          {/* Feed Simulator Button */}
           <button
-            onClick={handleForceSync}
-            disabled={isSyncingAll}
-            className="flex items-center gap-2 px-3.5 py-2 bg-[#0A3D62] hover:bg-[#072c47] text-white rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer disabled:opacity-60"
+            type="button"
+            onClick={handleFeedSimulator}
+            className="px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+            title="Simulate real-time stream packet ingestion"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${isSyncingAll ? 'animate-spin' : ''}`} />
-            <span>{isSyncingAll ? 'Synchronizing Ingestion...' : 'Force Sync Telemetry'}</span>
+            <Radio className="h-4 w-4 text-blue-600 animate-pulse" />
+            <span>Feed Simulator</span>
+          </button>
+
+          {/* Primary Action Button: Verify Cryptographic Hashes */}
+          <button
+            type="button"
+            onClick={() => setIsCryptoModalOpen(true)}
+            className="px-4 py-2 bg-[#0B1F3A] hover:bg-[#07162b] text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-2 cursor-pointer shadow-sm group"
+          >
+            <ShieldCheck className="h-4 w-4 text-[#F28C28] group-hover:scale-105 transition-transform" />
+            <span>Verify Cryptographic Hashes</span>
+          </button>
+
+          {/* Force Full Sync Icon Button */}
+          <button
+            type="button"
+            disabled={isGlobalSyncing}
+            onClick={handleForceFullSync}
+            className="p-2 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-xl text-xs font-bold transition-colors cursor-pointer disabled:opacity-50"
+            title="Force Full Synchronization"
+          >
+            <RefreshCw className={`h-4 w-4 ${isGlobalSyncing ? 'animate-spin text-blue-700' : ''}`} />
           </button>
         </div>
       </div>
 
-      {/* KPI Overview */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="bg-white rounded-xl p-4 border border-slate-200/80 shadow-xs border-l-4 border-l-[#0A3D62]">
-          <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 font-mono">
-            Total Ingested Corpus
+      {/* 2. TOP KPI / HEALTH STRIP (4 cards in single row) */}
+      <ObservatoryMetricsStrip
+        kpis={kpis}
+        onCardClick={(key) => {
+          if (key === 'registries') onShowToast('Active Registries', 'All 9 statutory registry streams operational.', 'info');
+          if (key === 'volume') onShowToast('24H Volume', '18.4 Million ledger events ingested and deduplicated.', 'info');
+          if (key === 'quality') onShowToast('Data Quality Score', '96.8% NCVET Quality Standard Compliant (k=0.962)', 'info');
+          if (key === 'latency') onShowToast('Pipeline Latency', 'Current stream frequency: 02:00 min scheduled cycle.', 'info');
+        }}
+      />
+
+      {/* 3. SECTION: HOW THE UNIFIED LABOUR MARKET DEMAND INDEX IS COMPUTED */}
+      <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-2xs space-y-4">
+        {/* Header line */}
+        <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-100">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-mono font-bold text-blue-600 uppercase tracking-wider">
+              ALGORITHMIC ARCHITECTURE
+            </span>
+            <span className="text-slate-300">•</span>
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+              How the Unified Labour Market Demand Index is Computed
+            </h2>
           </div>
-          <div className="text-2xl font-black text-slate-900 font-mono tracking-tight">
-            431.5M Records
-          </div>
-          <div className="text-[11px] text-slate-500 mt-1 flex items-center gap-1">
-            <CheckCircle2 className="h-3 w-3 text-emerald-600" />
-            <span>Cryptographically sealed & Aadhaar deduplicated</span>
+
+          <div className="flex items-center gap-1.5 text-xs font-mono text-slate-500">
+            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>Pipeline Status: <strong className="text-slate-800">Step 4 / Continuous Stream</strong></span>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-4 border border-slate-200/80 shadow-xs border-l-4 border-l-emerald-600">
-          <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 font-mono">
-            System Ingestion SLA
-          </div>
-          <div className="text-2xl font-black text-emerald-700 font-mono tracking-tight">
-            99.98%
-          </div>
-          <div className="text-[11px] text-slate-500 mt-1">
-            NIC Meghraj Government Cloud Tier-4
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl p-4 border border-slate-200/80 shadow-xs border-l-4 border-l-blue-600">
-          <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 font-mono">
-            Average Ingestion Latency
-          </div>
-          <div className="text-2xl font-black text-slate-900 font-mono tracking-tight">
-            184 ms
-          </div>
-          <div className="text-[11px] text-slate-500 mt-1">
-            Continuous real-time stream processing
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl p-4 border border-slate-200/80 shadow-xs border-l-4 border-l-purple-600">
-          <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 font-mono">
-            Active Data Sources
-          </div>
-          <div className="text-2xl font-black text-purple-800 font-mono tracking-tight">
-            6 Pipelines
-          </div>
-          <div className="text-[11px] text-slate-500 mt-1">
-            All 6 pipelines fully operational
-          </div>
-        </div>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200">
-        <button
-          onClick={() => setActiveTab('pipelines')}
-          className={`px-4 py-2 text-xs font-bold border-b-2 cursor-pointer transition-colors ${
-            activeTab === 'pipelines'
-              ? 'border-[#0A3D62] text-[#0A3D62]'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          Statutory Ingestion Pipelines (6)
-        </button>
-        <button
-          onClick={() => setActiveTab('stream')}
-          className={`px-4 py-2 text-xs font-bold border-b-2 cursor-pointer transition-colors ${
-            activeTab === 'stream'
-              ? 'border-[#0A3D62] text-[#0A3D62]'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          Live Telemetry Event Log
-        </button>
-        <button
-          onClick={() => setActiveTab('provenance')}
-          className={`px-4 py-2 text-xs font-bold border-b-2 cursor-pointer transition-colors ${
-            activeTab === 'provenance'
-              ? 'border-[#0A3D62] text-[#0A3D62]'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          Data Lineage & Provenance Architecture
-        </button>
-      </div>
-
-      {/* Content based on Active Tab */}
-      {activeTab === 'pipelines' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {pipelines.map((pipe) => (
-            <div
-              key={pipe.id}
-              className="bg-white rounded-xl p-4 border border-slate-200/90 shadow-xs hover:border-blue-400 hover:shadow-md transition-all flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <div>
-                    <h3 className="text-xs font-black text-slate-900 leading-tight">
-                      {pipe.name}
-                    </h3>
-                    <p className="text-[10px] text-slate-500 font-medium">
-                      {pipe.agency}
-                    </p>
-                  </div>
-                  <span className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-emerald-50 text-emerald-800 border border-emerald-200">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 animate-pulse" />
-                    {pipe.status}
-                  </span>
-                </div>
-
-                <div className="bg-slate-50 rounded-lg p-2.5 my-3 space-y-1.5 text-xs">
-                  <div className="flex items-center justify-between text-[11px]">
-                    <span className="text-slate-500">Record Volume:</span>
-                    <span className="font-mono font-bold text-slate-900">{pipe.recordCount}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-[11px]">
-                    <span className="text-slate-500">Pipeline Latency:</span>
-                    <span className="font-mono font-bold text-emerald-700">{pipe.latencyMs} ms</span>
-                  </div>
-                  <div className="flex items-center justify-between text-[11px]">
-                    <span className="text-slate-500">Sync Cadence:</span>
-                    <span className="font-mono text-slate-700">{pipe.cadence}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
-                <span className="font-mono font-semibold truncate max-w-[170px]">{pipe.protocol}</span>
-                <span className="font-mono font-bold text-emerald-700">{pipe.healthPct}% Health</span>
-              </div>
-            </div>
+        {/* 4 Pipeline Stage Cards connected in a row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5">
+          {stages.map((stage) => (
+            <PipelineStageCard
+              key={stage.id}
+              stage={stage}
+              onSelect={() => {
+                onShowToast(stage.title, `Current processing state: ${stage.metricValue}`, 'info');
+              }}
+            />
           ))}
         </div>
-      )}
 
-      {activeTab === 'stream' && (
-        <div className="bg-white rounded-xl p-4 border border-slate-200/90 shadow-xs">
-          <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
-            <div className="flex items-center gap-2">
-              <Radio className="h-4 w-4 text-emerald-600 animate-pulse" />
-              <h2 className="text-xs font-black text-slate-900 uppercase tracking-wider">
-                Real-Time Ingestion Event Stream (Last 10 Minutes)
-              </h2>
+        {/* Mathematical Formula & Econometric Proof Banner */}
+        <div className="p-3.5 sm:p-4 rounded-xl bg-slate-50/90 border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
+          <div className="flex items-start gap-3">
+            <div className="h-7 w-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center font-black shrink-0 text-sm">
+              ∑
             </div>
-            <span className="text-[10px] font-mono font-bold text-slate-500">
-              Live Kafka Inflow Active
-            </span>
+            <div>
+              <div className="font-mono text-[11px] font-bold text-slate-800 flex items-center gap-1 flex-wrap">
+                <span className="text-blue-700">Demand Index Formulation (LMIS-Econ-V3):</span>
+                <span className="text-slate-900 font-bold bg-white px-2 py-0.5 rounded border border-slate-200">
+                  DI(i,t) = [α · Vacancy_Count(NCO_8, i,t)] + [β · PLFS_Active_Jobseekers(i,t)] + [γ · EPFO_Net_Additions(i,t)] + [δ · Industrial_Power_Index(i,t)]
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500 mt-1 font-mono">
+                where elastic weights: α=0.35, β=0.25, γ=0.25, δ=0.15 normalized across 766 districts
+              </p>
+            </div>
           </div>
 
-          <div className="space-y-2.5">
-            {liveStreamEvents.map((ev) => (
-              <div
-                key={ev.id}
-                className="flex items-start gap-3 p-3 rounded-lg bg-slate-50/70 border border-slate-100 hover:bg-slate-100/70 transition-colors"
-              >
-                <span className="text-[10px] font-mono font-bold text-slate-400 shrink-0 mt-0.5">
-                  {ev.time}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-[#0A3D62]">{ev.source}</span>
-                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-blue-100 text-blue-800 font-semibold uppercase">
-                      {ev.type}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-700 mt-0.5 font-medium">{ev.event}</p>
-                </div>
+          <div className="text-[11px] text-emerald-800 font-medium shrink-0 flex items-center gap-1.5 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+            <span>Peer-reviewed by NITI Aayog & NCVET Working Econometric Panel</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 4. SECTION: REGISTRY FEED STATUS & REAL-TIME VERIFICATION */}
+      <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-2xs space-y-4">
+        {/* Header */}
+        <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-100">
+          <div>
+            <span className="text-[10px] font-mono font-bold text-blue-600 uppercase tracking-wider block mb-0.5">
+              STATUTORY INTEGRITY
+            </span>
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+              Registry Feed Status & Real-time Verification
+            </h2>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-mono text-slate-500 bg-slate-100 px-2 py-1 rounded-md border border-slate-200">
+              LAST AUDIT: <strong className="text-slate-800 uppercase">{lastAuditAgo}</strong>
+            </span>
+          </div>
+        </div>
+
+        {/* 6 Registry Cards Grid (3 columns x 2 rows) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+          {registries.map((registry) => (
+            <RegistryHealthCard
+              key={registry.id}
+              registry={registry}
+              onSelect={(r) => selectRegistry(r)}
+              onForceSync={(id, e) => {
+                e.stopPropagation();
+                forceSyncRegistry(id);
+                onShowToast('Synchronizing Stream', `Refreshing live feed for ${registry.name}...`, 'info');
+              }}
+              onTogglePause={(id, e) => {
+                e.stopPropagation();
+                togglePauseRegistry(id);
+                onShowToast(
+                  registry.isPaused ? 'Feed Resumed' : 'Feed Paused',
+                  `${registry.name} stream status updated.`,
+                  'info'
+                );
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* 5. LOWER SECTIONS: TWO-COLUMN LAYOUT */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        {/* Left Column (approx 68% width) - Immutable Ledger Events */}
+        <div className="lg:col-span-8">
+          <IngestionLogTable
+            events={ledgerEvents}
+            onExportCsv={handleExportCsv}
+            onExportPdf={handleExportPdf}
+            onShowToast={onShowToast}
+          />
+        </div>
+
+        {/* Right Column (approx 32% width) - Data Sharing & Access Compliance */}
+        <div className="lg:col-span-4">
+          <CompliancePanel
+            onOpenCharter={() => setShowComplianceModal(true)}
+          />
+        </div>
+      </div>
+
+      {/* 6. BOTTOM INSTITUTIONAL METHODOLOGY & INTEGRATION HUB BANNER */}
+      <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-xl bg-[#0B1F3A] text-white flex items-center justify-center shrink-0 shadow-xs">
+            <Database className="h-5 w-5 text-[#F28C28]" />
+          </div>
+          <div>
+            <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
+              Institutional Methodology & Integration Hub
+            </h3>
+            <p className="text-xs text-slate-500">
+              Engaging state skill missions, policy research teams, and enterprise partners with open data platforms.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 shrink-0">
+          <button
+            type="button"
+            onClick={() => setShowApiKeyModal(true)}
+            className="px-3.5 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+          >
+            <Key className="h-3.5 w-3.5 text-blue-600" />
+            <span>Generate Secure API Key</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              onShowToast('Audit Log Console', 'Viewing authenticated cryptographic ledger traces...', 'info');
+            }}
+            className="px-3.5 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+          >
+            <FileText className="h-3.5 w-3.5 text-slate-600" />
+            <span>View Pipeline Audit Logs</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleDownloadWhitepaper}
+            className="px-4 py-2 bg-[#0B1F3A] hover:bg-[#07162b] text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+          >
+            <Download className="h-3.5 w-3.5 text-[#F28C28]" />
+            <span>Download Methodology Whitepaper (PDF)</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Slide-over Drawer for Registry Detail */}
+      <RegistryDetailDrawer
+        registry={selectedRegistry}
+        isOpen={isDetailDrawerOpen}
+        onClose={() => setIsDetailDrawerOpen(false)}
+        onForceSync={forceSyncRegistry}
+        onTogglePause={togglePauseRegistry}
+        onShowToast={onShowToast}
+      />
+
+      {/* Cryptographic Verification Modal */}
+      <CryptoVerificationModal
+        isOpen={isCryptoModalOpen}
+        onClose={() => setIsCryptoModalOpen(false)}
+        onShowToast={onShowToast}
+      />
+
+      {/* DPDP Compliance Charter Modal */}
+      {showComplianceModal && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-2xs">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full border border-slate-200 overflow-hidden animate-in zoom-in-95">
+            <div className="p-4 sm:p-5 bg-[#0B1F3A] text-white flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <ShieldCheck className="h-5 w-5 text-[#F28C28]" />
+                <h3 className="text-base font-bold text-white">DPDP Act 2023 Compliance Charter</h3>
               </div>
-            ))}
+              <button
+                onClick={() => setShowComplianceModal(false)}
+                className="p-1 rounded text-slate-300 hover:text-white"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="p-5 space-y-3.5 text-xs text-slate-700 leading-relaxed max-h-[70vh] overflow-y-auto">
+              <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-900 font-medium">
+                Official Certification: Compliant under Digital Personal Data Protection Act 2023 (DPDP) and CERT-In Security Guidelines.
+              </div>
+              <p>
+                <strong>1. Data Minimization & Tokenization:</strong> All personal identifiers (Aadhaar, UAN, PAN) are anonymized within a Sovereign Vault before inclusion into the Unified Labour Market Index.
+              </p>
+              <p>
+                <strong>2. Differential Privacy Guarantees:</strong> Ingestion pipelines introduce Laplace noise (ε = 0.5) to prevent re-identification of individual workers or micro-enterprises at sub-district resolution.
+              </p>
+              <p>
+                <strong>3. Statutory Audit Trail:</strong> Every batch addition generates an immutable SHA-256 block hash verified across National Informatics Centre (NIC) nodes.
+              </p>
+            </div>
+            <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end">
+              <button
+                onClick={() => setShowComplianceModal(false)}
+                className="px-4 py-2 bg-[#0B1F3A] hover:bg-[#07162b] text-white text-xs font-bold rounded-lg cursor-pointer"
+              >
+                Close Charter
+              </button>
+            </div>
           </div>
         </div>
       )}
 
-      {activeTab === 'provenance' && (
-        <div className="bg-white rounded-xl p-5 border border-slate-200/90 shadow-xs space-y-4">
-          <h2 className="text-xs font-black text-slate-900 uppercase tracking-wider">
-            Data Lineage & Algorithmic Provenance Framework
-          </h2>
-          <p className="text-xs text-slate-600 leading-relaxed max-w-2xl">
-            Raw employment records from statutory government registers undergo cryptographic verification, Aadhaar de-duplication, and Bayesian structural Kalman filtering to produce high-frequency labour demand and supply indices for policy decisions.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3 pt-2">
-            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-center">
-              <div className="text-[10px] font-bold text-slate-500 font-mono">STAGE 1</div>
-              <h4 className="text-xs font-black text-[#0A3D62] mt-1">Raw Register Ingestion</h4>
-              <p className="text-[11px] text-slate-500 mt-1">e-Shram, EPFO, NCS, SIDH</p>
+      {/* API Key Modal */}
+      {showApiKeyModal && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-2xs">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full border border-slate-200 overflow-hidden animate-in zoom-in-95">
+            <div className="p-4 sm:p-5 bg-[#0B1F3A] text-white flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <Key className="h-5 w-5 text-[#F28C28]" />
+                <h3 className="text-base font-bold text-white">Institutional Open Data API Key</h3>
+              </div>
+              <button
+                onClick={() => setShowApiKeyModal(false)}
+                className="p-1 rounded text-slate-300 hover:text-white"
+              >
+                <X className="h-5 w-5" />
+              </button>
             </div>
-            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-center">
-              <div className="text-[10px] font-bold text-slate-500 font-mono">STAGE 2</div>
-              <h4 className="text-xs font-black text-[#0A3D62] mt-1">De-Duplication & Hashing</h4>
-              <p className="text-[11px] text-slate-500 mt-1">SHA-256 One-Way Unique ID</p>
+            <div className="p-5 space-y-3 text-xs">
+              <p className="text-slate-600">
+                Use this authenticated bearer token to query the LMIS GraphQL and REST feeds for academic research or state war rooms:
+              </p>
+              <div className="p-3 bg-slate-900 text-emerald-400 font-mono rounded-lg flex items-center justify-between gap-2 overflow-x-auto text-[11px]">
+                <span className="truncate">{apiKey}</span>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(apiKey);
+                    setIsCopiedKey(true);
+                    onShowToast('API Key Copied', 'Token copied to clipboard.', 'info');
+                    setTimeout(() => setIsCopiedKey(false), 2000);
+                  }}
+                  className="p-1 bg-white/10 hover:bg-white/20 rounded text-slate-200 shrink-0"
+                >
+                  {isCopiedKey ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                </button>
+              </div>
+              <p className="text-[11px] text-slate-500">
+                Rate limit: 10,000 queries/hour. Data access restricted to anonymized aggregates.
+              </p>
             </div>
-            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-center">
-              <div className="text-[10px] font-bold text-slate-500 font-mono">STAGE 3</div>
-              <h4 className="text-xs font-black text-[#0A3D62] mt-1">Bayesian Kalman Filter</h4>
-              <p className="text-[11px] text-slate-500 mt-1">Structural Time Series Smoothing</p>
-            </div>
-            <div className="p-3 bg-blue-50 rounded-xl border border-blue-200 text-center">
-              <div className="text-[10px] font-bold text-blue-700 font-mono">STAGE 4</div>
-              <h4 className="text-xs font-black text-[#0A3D62] mt-1">LMIS War Room Serving</h4>
-              <p className="text-[11px] text-slate-600 mt-1">Sub-district Early Warnings</p>
+            <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end">
+              <button
+                onClick={() => setShowApiKeyModal(false)}
+                className="px-4 py-2 bg-[#0B1F3A] hover:bg-[#07162b] text-white text-xs font-bold rounded-lg cursor-pointer"
+              >
+                Done
+              </button>
             </div>
           </div>
         </div>

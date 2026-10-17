@@ -6,12 +6,15 @@ import { MessageSquareQuote, Building2, CheckCircle2, ArrowRight } from 'lucide-
 interface LocalIndustryVoiceCardProps {
   language: Language;
   onViewAllLogs?: () => void;
+  voices?: IndustryVoiceItem[];
 }
 
 export const LocalIndustryVoiceCard: React.FC<LocalIndustryVoiceCardProps> = ({
   language,
   onViewAllLogs,
+  voices: customVoices,
 }) => {
+  const activeVoices = customVoices || PUNE_INDUSTRY_VOICE;
   const dict = {
     en: {
       title: 'Local Industry Voice & Sentiment',
@@ -45,7 +48,7 @@ export const LocalIndustryVoiceCard: React.FC<LocalIndustryVoiceCardProps> = ({
 
         {/* List of Quotes */}
         <div className="space-y-3 pt-3">
-          {PUNE_INDUSTRY_VOICE.map((item) => (
+          {activeVoices.map((item) => (
             <div
               key={item.id}
               className="p-3 rounded-xl bg-slate-50/80 border border-slate-200/80 hover:bg-slate-50 hover:border-slate-300 transition-all text-xs"

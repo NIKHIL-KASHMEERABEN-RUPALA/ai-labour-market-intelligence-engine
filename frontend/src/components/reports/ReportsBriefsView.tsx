@@ -54,11 +54,18 @@ interface CadenceRow {
   status: 'Success' | 'Pending' | 'Delivered' | 'Confirmed';
 }
 
+import { useDashboardStore } from '../../stores/dashboardStore';
+
 export const GovernmentDecisionSupportHub: React.FC<GovernmentDecisionSupportHubProps> = ({
   language,
   onNavigateHome,
   onShowToast,
 }) => {
+  const globalSector = useDashboardStore((s) => s.selectedSector);
+  const globalGeo = useDashboardStore((s) => s.selectedGeography);
+  const globalHorizon = useDashboardStore((s) => s.selectedTimeHorizon);
+  const globalScenario = useDashboardStore((s) => s.selectedScenario);
+
   // State for synthesis blocks assembly
   const [assemblyBlocks, setAssemblyBlocks] = useState([
     { id: 'b1', title: 'District Choropleth Map • जिला कोरोप्लेथ मानचित्र', type: 'map', pages: 'Page 1-3' },
@@ -86,11 +93,26 @@ export const GovernmentDecisionSupportHub: React.FC<GovernmentDecisionSupportHub
   });
 
   const [outputLanguage, setOutputLanguage] = useState<'bilingual' | 'en' | 'hi'>('bilingual');
-  const [dataScope, setDataScope] = useState('FY 2026-27 Q3 Live Sync');
+  const [dataScope, setDataScope] = useState(
+    globalGeo !== 'all' || globalSector !== 'all'
+      ? `FY 2026-27 • ${globalGeo !== 'all' ? globalGeo : 'All-India'} (${globalSector.toUpperCase()}) • ${globalScenario.toUpperCase()} SYNC`
+      : 'FY 2026-27 Q3 Live Sync'
+  );
   const [classification, setClassification] = useState('RESTRICTED • FOR OFFICIAL USE');
   const [isCompiling, setIsCompiling] = useState(false);
 
-  // Priority Briefs list
+  // Sync dataScope when filters change
+  React.useEffect(() => {
+    setDataScope(
+      `FY 2026-27 • ${globalGeo !== 'all' ? globalGeo : 'National'} (${globalSector.toUpperCase()}) • ${globalScenario.toUpperCase()}`
+    );
+  }, [globalGeo, globalSector, globalScenario]);
+
+  // Dynamic Priority Briefs list
+  const warRoomTitle = globalGeo === 'GJ' ? 'Dholera SIR Brief' : globalGeo === 'TN' ? 'Sriperumbudur Brief' : globalGeo === 'KA' ? 'Bengaluru Hub Brief' : 'Pune War Room Brief';
+  const warRoomSubtitle = globalGeo === 'GJ' ? 'Semiconductor & Clean Tech Escalation Pack' : globalGeo === 'TN' ? 'EV Mobility & Hardware Escalation Pack' : globalGeo === 'KA' ? 'Aerospace & Precision Machining Pack' : 'Critical Shortage Escalation Pack';
+  const warRoomDocCode = `WAR/${globalGeo !== 'all' ? globalGeo : 'PUNE'}/2026/09`;
+
   const priorityBriefs: PriorityBrief[] = [
     {
       id: 'pb-1',
@@ -118,15 +140,15 @@ export const GovernmentDecisionSupportHub: React.FC<GovernmentDecisionSupportHub
     },
     {
       id: 'pb-3',
-      title: 'War Room Brief',
+      title: warRoomTitle,
       titleHi: 'वार रूम ब्रीफ',
-      subtitle: 'Critical Shortage Escalation Pack',
+      subtitle: warRoomSubtitle,
       status: 'In Review',
       statusColor: 'bg-amber-50 text-amber-700 border-amber-200',
       lastGenerated: '11 Oct 2026',
       nextAuto: '18 Oct 2026',
       pages: 12,
-      docCode: 'WAR/PUNE/2026/09',
+      docCode: warRoomDocCode,
     },
     {
       id: 'pb-4',

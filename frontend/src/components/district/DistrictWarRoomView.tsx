@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { DistrictHeaderSubBar } from './DistrictHeaderSubBar';
 import { DistrictFilterBar } from './DistrictFilterBar';
 import { DistrictKpiStrip } from './DistrictKpiStrip';
@@ -11,6 +11,8 @@ import { RecommendedInterventionsGrid } from './RecommendedInterventionsGrid';
 import { DistrictActionBriefModal } from './DistrictActionBriefModal';
 
 import { Language, PuneTradeLedgerItem, TrainingCenterMarker, DistrictIntervention } from '../../types';
+import { getDistrictWarRoomData } from '../../data/puneMockData';
+import { useDashboardStore } from '../../stores/dashboardStore';
 
 interface DistrictWarRoomViewProps {
   language: Language;
@@ -25,18 +27,50 @@ export const DistrictWarRoomView: React.FC<DistrictWarRoomViewProps> = ({
   onShowToast,
   onRequestRequisition,
 }) => {
-  const [selectedDistrict, setSelectedDistrict] = useState('pune');
-  const [selectedSector, setSelectedSector] = useState('all');
-  const [selectedHorizon, setSelectedHorizon] = useState('12m');
+  const globalSector = useDashboardStore((s) => s.selectedSector);
+  const globalGeo = useDashboardStore((s) => s.selectedGeography);
+  const globalHorizon = useDashboardStore((s) => s.selectedTimeHorizon);
+  const globalScenario = useDashboardStore((s) => s.selectedScenario);
+
+  // Map global geography to default district
+  const defaultDistrictFromGeo = useMemo(() => {
+    if (globalGeo === 'GJ') return 'ahmedabad';
+    if (globalGeo === 'TN') return 'chennai';
+    if (globalGeo === 'KA') return 'bengaluru';
+    if (globalGeo === 'MH') return 'pune';
+    return 'pune';
+  }, [globalGeo]);
+
+  const [selectedDistrict, setSelectedDistrict] = useState(defaultDistrictFromGeo);
+  const [selectedSector, setSelectedSector] = useState(globalSector || 'all');
+  const [selectedHorizon, setSelectedHorizon] = useState(globalHorizon || '12m');
   const [showActionBrief, setShowActionBrief] = useState(false);
+
+  // Sync when global filters change
+  useEffect(() => {
+    setSelectedDistrict(defaultDistrictFromGeo);
+  }, [defaultDistrictFromGeo]);
+
+  useEffect(() => {
+    if (globalSector) setSelectedSector(globalSector);
+  }, [globalSector]);
+
+  useEffect(() => {
+    if (globalHorizon) setSelectedHorizon(globalHorizon);
+  }, [globalHorizon]);
+
+  // Retrieve dynamic district data
+  const districtData = useMemo(() => {
+    return getDistrictWarRoomData(selectedDistrict, selectedSector, globalScenario, selectedHorizon);
+  }, [selectedDistrict, selectedSector, globalScenario, selectedHorizon]);
 
   // Handle Export Report
   const handleExportReport = () => {
     onShowToast(
-      language === 'en' ? 'Generating Pune District Report' : 'पुणे जिला रिपोर्ट तैयार हो रही है',
+      language === 'en' ? `Generating ${districtData.districtName} Report` : `${districtData.districtName} रिपोर्ट तैयार हो रही है`,
       language === 'en'
-        ? 'Extracting local employer logs, taluka-level ITI rosters, and apprenticeship allocations...'
-        : 'स्थानीय नियोक्ता लॉग और तालुका स्तरीय आईटीआई रोस्टर निकाले जा रहे हैं...',
+        ? `Extracting local employer logs, taluka rosters, and training allocations for ${districtData.districtName}...`
+        : 'स्थानीय नियोक्ता लॉग और प्रशिक्षण डेटा निकाला जा रहा है...',
       'info'
     );
 
@@ -44,8 +78,8 @@ export const DistrictWarRoomView: React.FC<DistrictWarRoomViewProps> = ({
       onShowToast(
         language === 'en' ? 'District Dossier Download Ready' : 'जिला दस्तावेज डाउनलोड तैयार',
         language === 'en'
-          ? 'MSDE-MAHA-PUNE-WAR-ROOM-DOSSIER-Q3.pdf generated.'
-          : 'दस्तावेज़ MSDE-MAHA-PUNE-WAR-ROOM-DOSSIER-Q3.pdf तैयार है।',
+          ? `MSDE-${districtData.stateCode}-${districtData.districtId.toUpperCase()}-WAR-ROOM-DOSSIER.pdf generated.`
+          : 'दस्तावेज़ डाउनलोड हेतु तैयार है।',
         'success'
       );
     }, 1200);
@@ -56,8 +90,8 @@ export const DistrictWarRoomView: React.FC<DistrictWarRoomViewProps> = ({
     onShowToast(
       language === 'en' ? 'Target Revision Proposal Transmitted' : 'लक्ष्य संशोधन प्रस्ताव प्रेषित',
       language === 'en'
-        ? 'Submitted 16,200 seat augmentation request to Maharashtra State Skill Mission (MSSM).'
-        : 'महाराष्ट्र राज्य कौशल मिशन को 16,200 सीट वृद्धि अनुरोध प्रस्तुत किया गया।',
+        ? `Submitted 16,200 seat augmentation request to ${districtData.stateName} Skill Mission.`
+        : 'राज्य कौशल मिशन को सीट वृद्धि अनुरोध प्रस्तुत किया गया।',
       'success'
     );
   };
@@ -65,10 +99,10 @@ export const DistrictWarRoomView: React.FC<DistrictWarRoomViewProps> = ({
   // Handle SSC Flag
   const handleFlagSscReview = () => {
     onShowToast(
-      language === 'en' ? 'Flagged for SSC & Automotive Council Review' : 'एसएससी समीक्षा हेतु प्रेषित',
+      language === 'en' ? 'Flagged for SSC & Industry Council Review' : 'एसएससी समीक्षा हेतु प्रेषित',
       language === 'en'
-        ? 'Critical shortfall in 5-axis CNC Machinists and EV battery cell testers alerted to ASDC & CGSC.'
-        : '5-एक्सिस सीएनसी और ईवी बैटरी तकनीशियन की कमी हेतु ऑटोमोटिव व कैपिटल गुड्स काउंसिल को सूचित किया गया।',
+        ? `Critical shortfall in ${districtData.tradeLedger[0]?.trade || 'core industrial trades'} alerted to SSC.`
+        : 'महत्वपूर्ण कमी हेतु कौशल परिषद को सूचित किया गया।',
       'warning'
     );
   };
@@ -76,7 +110,7 @@ export const DistrictWarRoomView: React.FC<DistrictWarRoomViewProps> = ({
   // Handle Share with State Mission
   const handleShareStateMission = () => {
     onShowToast(
-      language === 'en' ? 'Dossier Shared with Maharashtra SDMS' : 'महाराष्ट्र एसडीएमएस के साथ साझा किया गया',
+      language === 'en' ? `Dossier Shared with ${districtData.stateName} SDMS` : 'राज्य मिशन के साथ साझा किया गया',
       language === 'en'
         ? 'Real-time telemetry and Collector Directives synchronized with State Chief Secretary Portal.'
         : 'मुख्य सचिव पोर्टल के साथ वास्तविक समय टेलीमेट्री और कलेक्टर निर्देश समन्वयित किए गए।',
@@ -104,6 +138,13 @@ export const DistrictWarRoomView: React.FC<DistrictWarRoomViewProps> = ({
         onOpenActionBrief={() => setShowActionBrief(true)}
         onProposeTargetRevision={handleProposeTargetRevision}
         onFlagSscReview={handleFlagSscReview}
+        title={districtData.districtName}
+        titleHi={districtData.districtNameHi}
+        breadcrumbState={districtData.stateName}
+        breadcrumbCurrent={districtData.districtName}
+        priorityBadge={districtData.priorityBadge}
+        subtitle={districtData.clusterSubtitle}
+        subtitleHi={districtData.clusterSubtitleHi}
       />
 
       {/* 2. Top Filter / Context Bar */}
@@ -114,7 +155,7 @@ export const DistrictWarRoomView: React.FC<DistrictWarRoomViewProps> = ({
         selectedSector={selectedSector}
         onSectorChange={setSelectedSector}
         selectedHorizon={selectedHorizon}
-        onHorizonChange={setSelectedHorizon}
+        onHorizonChange={(val) => setSelectedHorizon(val as any)}
         onExportReport={handleExportReport}
         onGenerateActionBrief={() => setShowActionBrief(true)}
       />
@@ -122,6 +163,7 @@ export const DistrictWarRoomView: React.FC<DistrictWarRoomViewProps> = ({
       {/* 3. Top KPI Strip (4 Cards) */}
       <DistrictKpiStrip
         language={language}
+        kpis={districtData.kpis}
         onCardClick={(key) => {
           if (key === 'alerts') {
             handleFlagSscReview();
@@ -134,20 +176,27 @@ export const DistrictWarRoomView: React.FC<DistrictWarRoomViewProps> = ({
         {/* Left Main Column (7 cols): Gap Forecast Chart + Action Ledger Table */}
         <div className="lg:col-span-7 space-y-4">
           {/* 6 to 18-Month Demand-Supply Gap Forecast Chart */}
-          <DemandSupplyGapChart language={language} />
+          <DemandSupplyGapChart
+            language={language}
+            forecastData={districtData.forecastData}
+            subtitle={districtData.clusterSubtitle}
+          />
 
           {/* Critical Trade Capacity & Action Ledger */}
           <DistrictTradeLedgerTable
             language={language}
+            trades={districtData.tradeLedger}
             onActionClick={onRequestRequisition}
           />
         </div>
 
         {/* Right Column (5 cols): Map + Local Industry Voice + Collector Directives */}
         <div className="lg:col-span-5 space-y-4">
-          {/* Geographic Infrastructure Map of Pune */}
+          {/* Geographic Infrastructure Map */}
           <PuneMapComponent
             language={language}
+            districtTitle={districtData.districtName}
+            districtBadge={`${districtData.districtName} (${districtData.districtCode})`}
             onSelectCenter={(center) => {
               onShowToast(
                 center.name,
@@ -160,12 +209,14 @@ export const DistrictWarRoomView: React.FC<DistrictWarRoomViewProps> = ({
           {/* Local Industry Voice & Sentiment */}
           <LocalIndustryVoiceCard
             language={language}
+            voices={districtData.industryVoices}
             onViewAllLogs={() => setShowActionBrief(true)}
           />
 
           {/* District Collector Directives & Quick Action Panel */}
           <DistrictCollectorDirectivesCard
             language={language}
+            directives={districtData.directives}
             onProposeTargetRevision={handleProposeTargetRevision}
             onFlagSscReview={handleFlagSscReview}
             onGenerateActionBrief={() => setShowActionBrief(true)}

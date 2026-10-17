@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ForecastingHeaderSubBar } from './ForecastingHeaderSubBar';
 import { EconometricTrajectoryChart } from './EconometricTrajectoryChart';
 import { PolicyScenarioSimulator } from './PolicyScenarioSimulator';
@@ -23,22 +23,48 @@ interface ForecastingViewProps {
   onShowToast: (title: string, message: string, type?: 'success' | 'info' | 'warning') => void;
 }
 
+import { useDashboardStore } from '../../stores/dashboardStore';
+
 export const ForecastingView: React.FC<ForecastingViewProps> = ({
   language,
   onNavigateHome,
   onShowToast,
 }) => {
-  const [selectedSector, setSelectedSector] = useState('semi');
-  const [selectedCorridor, setSelectedCorridor] = useState('dholera');
-  const [selectedHorizon, setSelectedHorizon] = useState('18m');
+  const globalSector = useDashboardStore((s) => s.selectedSector);
+  const globalGeo = useDashboardStore((s) => s.selectedGeography);
+  const globalHorizon = useDashboardStore((s) => s.selectedTimeHorizon);
+  const globalScenario = useDashboardStore((s) => s.selectedScenario);
+  const setSelectedSectorStore = useDashboardStore((s) => s.setSelectedSector);
+  const setSelectedHorizonStore = useDashboardStore((s) => s.setSelectedTimeHorizon);
+
+  const defaultCorridor = globalGeo === 'GJ' ? 'dholera' : globalGeo === 'MH' ? 'pune' : globalGeo === 'TN' ? 'sriperumbudur' : 'dholera';
+
+  const [selectedSector, setSelectedSector] = useState(globalSector || 'semi');
+  const [selectedCorridor, setSelectedCorridor] = useState(defaultCorridor);
+  const [selectedHorizon, setSelectedHorizon] = useState(globalHorizon === '24m' ? '24m' : globalHorizon === '36m' ? '36m' : '18m');
   const [confidenceLevel, setConfidenceLevel] = useState(86);
   const [isReEstimating, setIsReEstimating] = useState(false);
   const [showCabinetSlide, setShowCabinetSlide] = useState(false);
   const [chartViewMode, setChartViewMode] = useState<'both' | 'recharts_12m' | 'd3_scatter'>('both');
 
+  // Sync with global store changes
+  useEffect(() => {
+    if (globalSector) setSelectedSector(globalSector);
+  }, [globalSector]);
+
+  useEffect(() => {
+    setSelectedCorridor(defaultCorridor);
+  }, [defaultCorridor]);
+
+  useEffect(() => {
+    if (globalHorizon) {
+      setSelectedHorizon(globalHorizon === '24m' ? '24m' : globalHorizon === '36m' ? '36m' : '18m');
+    }
+  }, [globalHorizon]);
+
   // Scenario Simulator parameters state
   const [scenarioParams, setScenarioParams] = useState<ScenarioParameters>({
-    seatExpansionPct: 65,
+    seatExpansionPct: globalScenario === 'optimistic' ? 85 : globalScenario === 'conservative' ? 25 : 65,
     bridgeCertMonths: 6,
     napsQuotaPct: 38,
   });
@@ -171,6 +197,7 @@ export const ForecastingView: React.FC<ForecastingViewProps> = ({
       {(chartViewMode === 'both' || chartViewMode === 'd3_scatter') && (
         <SkillDemandPlacementScatterPlot
           language={language}
+          externalSectorFilter={selectedSector}
           onPointSelect={(point) => {
             onShowToast(
               `${point.cluster} (${point.period})`,

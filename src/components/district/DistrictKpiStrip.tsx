@@ -7,29 +7,44 @@ import { formatIndianNumber } from '../../utils/formatters';
 interface DistrictKpiStripProps {
   language: Language;
   onCardClick?: (metricKey: string) => void;
+  kpis?: {
+    tradesTracked: number;
+    tradesSub: string;
+    tradesSubHi: string;
+    criticalAlerts: number;
+    alertsSub: string;
+    alertsSubHi: string;
+    activeSeats: number;
+    seatsSub: string;
+    seatsSubHi: string;
+    placementRate: number;
+    placementSub: string;
+    placementSubHi: string;
+  };
 }
 
-export const DistrictKpiStrip: React.FC<DistrictKpiStripProps> = ({ language, onCardClick }) => {
+export const DistrictKpiStrip: React.FC<DistrictKpiStripProps> = ({ language, onCardClick, kpis: customKpis }) => {
+  const activeKpis = customKpis || PUNE_KPIS;
   const dict = {
     en: {
       tradesTitle: 'Active PMKK & ITI Trades',
-      tradesSub: PUNE_KPIS.tradesSub,
+      tradesSub: activeKpis.tradesSub,
       alertsTitle: 'Critical Alerts',
-      alertsSub: PUNE_KPIS.alertsSub,
+      alertsSub: activeKpis.alertsSub,
       seatsTitle: 'Active Trained Seats',
-      seatsSub: PUNE_KPIS.seatsSub,
+      seatsSub: activeKpis.seatsSub,
       placementTitle: 'Local Industry Placement Rate',
-      placementSub: PUNE_KPIS.placementSub,
+      placementSub: activeKpis.placementSub,
     },
     hi: {
       tradesTitle: 'सक्रिय पीएमकेके व आईटीआई व्यवसाय',
-      tradesSub: PUNE_KPIS.tradesSubHi,
+      tradesSub: activeKpis.tradesSubHi,
       alertsTitle: 'महत्वपूर्ण चेतावनी अलर्ट',
-      alertsSub: PUNE_KPIS.alertsSubHi,
+      alertsSub: activeKpis.alertsSubHi,
       seatsTitle: 'सक्रिय प्रशिक्षित सीटें',
-      seatsSub: PUNE_KPIS.seatsSubHi,
+      seatsSub: activeKpis.seatsSubHi,
       placementTitle: 'स्थानीय उद्योग नियोजन दर',
-      placementSub: PUNE_KPIS.placementSubHi,
+      placementSub: activeKpis.placementSubHi,
     },
   };
   const t = dict[language === 'hi' ? 'hi' : 'en'];
@@ -52,10 +67,10 @@ export const DistrictKpiStrip: React.FC<DistrictKpiStripProps> = ({ language, on
 
         <div className="my-1.5 flex items-baseline gap-2">
           <span className="text-2xl sm:text-3xl font-extrabold font-mono text-slate-900 tracking-tight tabular-nums">
-            {PUNE_KPIS.tradesTracked}
+            {activeKpis.tradesTracked}
           </span>
           <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
-            14 Tracked
+            {activeKpis.tradesTracked} Tracked
           </span>
         </div>
 

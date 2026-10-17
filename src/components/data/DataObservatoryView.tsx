@@ -36,50 +36,67 @@ interface IngestionPipeline {
   healthPct: number;
 }
 
+import { useDashboardStore } from '../../stores/dashboardStore';
+
 export const DataObservatoryView: React.FC<DataObservatoryViewProps> = ({
   language,
   onNavigateHome,
   onShowToast,
 }) => {
+  const selectedSector = useDashboardStore((s) => s.selectedSector);
+  const selectedGeography = useDashboardStore((s) => s.selectedGeography);
+
   const [isSyncingAll, setIsSyncingAll] = useState(false);
   const [activeTab, setActiveTab] = useState<'pipelines' | 'stream' | 'provenance'>('pipelines');
-  const [liveStreamEvents, setLiveStreamEvents] = useState([
-    {
-      id: 'e1',
-      time: '14:42:01 IST',
-      source: 'e-Shram Portal API',
-      event: 'Ingested 14,800 migrant worker profile updates from Pune district',
-      type: 'ingest',
-    },
-    {
-      id: 'e2',
-      time: '14:41:48 IST',
-      source: 'EPFO Monthly Filing',
-      event: 'Added 48,200 new formal payroll registrations in Automotive & Capital Goods',
-      type: 'payroll',
-    },
-    {
-      id: 'e3',
-      time: '14:41:22 IST',
-      source: 'National Career Service',
-      event: 'Parsed 3,420 acute vacancies for 5-Axis CNC Operator across Maharashtra & Gujarat',
-      type: 'demand',
-    },
-    {
-      id: 'e4',
-      time: '14:40:55 IST',
-      source: 'NCVET SID Platform',
-      event: 'Certified 1,280 candidates under NSQF Level 5 (Mechatronics & EV Powertrain)',
-      type: 'supply',
-    },
-    {
-      id: 'e5',
-      time: '14:40:19 IST',
-      source: 'Naukri.com Real-time Feed',
-      event: 'Scraped 18,500 active job postings in Electronics ESDM & Clean Energy',
-      type: 'market',
-    },
-  ]);
+
+  const getDynamicEvents = () => {
+    const geoLabel = selectedGeography === 'GJ' ? 'Gujarat (Dholera/Sanand)' : selectedGeography === 'TN' ? 'Tamil Nadu (Sriperumbudur)' : selectedGeography === 'KA' ? 'Karnataka (Bengaluru Tech Corridor)' : 'Maharashtra (Pune Cluster)';
+    const sectorLabel = selectedSector === 'semi' ? 'Electronics & Semiconductor Fab' : selectedSector === 'green' ? 'Green Hydrogen & Solar Tech' : selectedSector === 'auto' ? 'Automotive & Clean Mobility' : 'Advanced Precision Machining';
+
+    return [
+      {
+        id: 'e1',
+        time: '14:42:01 IST',
+        source: 'e-Shram Portal API',
+        event: `Ingested 14,800 worker profile updates from ${geoLabel}`,
+        type: 'ingest',
+      },
+      {
+        id: 'e2',
+        time: '14:41:48 IST',
+        source: 'EPFO Monthly Filing',
+        event: `Added 48,200 new formal payroll registrations in ${sectorLabel}`,
+        type: 'payroll',
+      },
+      {
+        id: 'e3',
+        time: '14:41:22 IST',
+        source: 'National Career Service',
+        event: `Parsed 4,920 acute employer vacancies mapped to ${geoLabel}`,
+        type: 'demand',
+      },
+      {
+        id: 'e4',
+        time: '14:40:55 IST',
+        source: 'NCVET SID Platform',
+        event: `Certified 2,180 candidates under ${sectorLabel} NSQF Level 5 qualifications`,
+        type: 'supply',
+      },
+      {
+        id: 'e5',
+        time: '14:40:19 IST',
+        source: 'Naukri.com Real-time Feed',
+        event: `Scraped 18,500 active job postings in high-priority regional corridors`,
+        type: 'market',
+      },
+    ];
+  };
+
+  const [liveStreamEvents, setLiveStreamEvents] = useState(getDynamicEvents);
+
+  useEffect(() => {
+    setLiveStreamEvents(getDynamicEvents());
+  }, [selectedGeography, selectedSector]);
 
   const pipelines: IngestionPipeline[] = [
     {

@@ -8,6 +8,16 @@ interface DistrictCollectorDirectivesCardProps {
   onFlagSscReview: () => void;
   onGenerateActionBrief: () => void;
   onShareStateMission: () => void;
+  directives?: {
+    title?: string;
+    titleHi?: string;
+    d1?: string;
+    d1Hi?: string;
+    d2?: string;
+    d2Hi?: string;
+    d3?: string;
+    d3Hi?: string;
+  };
 }
 
 export const DistrictCollectorDirectivesCard: React.FC<DistrictCollectorDirectivesCardProps> = ({
@@ -16,29 +26,30 @@ export const DistrictCollectorDirectivesCard: React.FC<DistrictCollectorDirectiv
   onFlagSscReview,
   onGenerateActionBrief,
   onShareStateMission,
+  directives: customDirectives,
 }) => {
   const dict = {
     en: {
-      title: 'District Collector Directives',
+      title: customDirectives?.title || 'District Collector Directives',
       verified: 'Executive Order Validated',
-      d1: 'Sanction 3-shift operational orders for 18 accredited ITIs across Chakan & Bhosari.',
-      d2: 'Reallocate 3,400 under-performing general electrical seats to EV & 5-axis CNC by Q1 FY27.',
-      d3: 'Mandate direct employer-linked dual-apprenticeship MoUs with MIDC anchor OEMs.',
+      d1: customDirectives?.d1 || 'Sanction 3-shift operational orders for 18 accredited ITIs across Chakan & Bhosari.',
+      d2: customDirectives?.d2 || 'Reallocate 3,400 under-performing general electrical seats to EV & 5-axis CNC by Q1 FY27.',
+      d3: customDirectives?.d3 || 'Mandate direct employer-linked dual-apprenticeship MoUs with MIDC anchor OEMs.',
       btn1: 'Propose Target Revision',
       btn2: 'Flag for SSC Review',
       btn3: 'District Action Brief (PDF)',
-      btn4: 'Transmit to Maharashtra SSDM',
+      btn4: 'Transmit to State SSDM',
     },
     hi: {
-      title: 'जिला कलेक्टर रणनीतिक निर्देश',
+      title: customDirectives?.titleHi || 'जिला कलेक्टर रणनीतिक निर्देश',
       verified: 'कार्यकारी आदेश प्रमाणित',
-      d1: 'चाकन और भोसरी के 18 मान्यता प्राप्त आईटीआई के लिए 3-शिफ्ट संचालन आदेश स्वीकृत करें।',
-      d2: '3,400 कम प्रदर्शन वाली सामान्य सीटों को Q1 FY27 तक ईवी और सीएनसी में पुनरावंटित करें।',
-      d3: 'एमआईडीसी एंकर ओईएम के साथ सीधे शिक्षुता समझौता ज्ञापनों को अनिवार्य करें।',
+      d1: customDirectives?.d1Hi || 'चाकन और भोसरी के 18 मान्यता प्राप्त आईटीआई के लिए 3-शिफ्ट संचालन आदेश स्वीकृत करें।',
+      d2: customDirectives?.d2Hi || '3,400 कम प्रदर्शन वाली सामान्य सीटों को Q1 FY27 तक ईवी और सीएनसी में पुनरावंटित करें।',
+      d3: customDirectives?.d3Hi || 'एमआईडीसी एंकर ओईएम के साथ सीधे शिक्षुता समझौता ज्ञापनों को अनिवार्य करें।',
       btn1: 'लक्ष्य संशोधन प्रस्ताव',
       btn2: 'एसएससी समीक्षा हेतु फ्लैग करें',
       btn3: 'जिला कार्य संक्षेपिका (पीडीएफ)',
-      btn4: 'महाराष्ट्र एसएसडीएम को प्रेषित करें',
+      btn4: 'राज्य एसएसडीएम को प्रेषित करें',
     },
   };
   const t = dict[language === 'hi' ? 'hi' : 'en'];

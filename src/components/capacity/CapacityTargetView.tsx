@@ -38,11 +38,18 @@ interface StateTargetRow {
   status: 'Surplus' | 'On Track' | 'Deficit';
 }
 
+import { useDashboardStore } from '../../stores/dashboardStore';
+
 export const CapacityTargetView: React.FC<CapacityTargetViewProps> = ({
   language,
   onNavigateHome,
   onShowToast,
 }) => {
+  const globalSector = useDashboardStore((s) => s.selectedSector);
+  const globalGeo = useDashboardStore((s) => s.selectedGeography);
+  const globalHorizon = useDashboardStore((s) => s.selectedTimeHorizon);
+  const globalScenario = useDashboardStore((s) => s.selectedScenario);
+
   // Simulator Sliders
   const [pmkvyGrowth, setPmkvyGrowth] = useState(18); // +18%
   const [itiModernization, setItiModernization] = useState(25); // +25%
@@ -50,100 +57,114 @@ export const CapacityTargetView: React.FC<CapacityTargetViewProps> = ({
   const [selectedScheme, setSelectedScheme] = useState<'all' | 'pmkvy' | 'cts' | 'naps'>('all');
   const [searchState, setSearchState] = useState('');
 
-  // Initial State Target Data
-  const [stateRows, setStateRows] = useState<StateTargetRow[]>([
+  // Scaling multipliers
+  const horizonMult = globalHorizon === '24m' ? 1.25 : globalHorizon === '36m' ? 1.45 : globalHorizon === 'n36' ? 0.92 : 1.0;
+  const scenarioMult = globalScenario === 'optimistic' ? 1.2 : globalScenario === 'conservative' ? 0.9 : 1.0;
+  const sectorMult = globalSector === 'semi' ? 0.85 : globalSector === 'mfg' ? 1.2 : globalSector === 'auto' ? 1.1 : globalSector === 'green' ? 0.95 : 1.0;
+  const combinedMult = horizonMult * scenarioMult * sectorMult;
+
+  // Base state records
+  const baseStateRows: (StateTargetRow & { code: string })[] = [
     {
+      code: 'MH',
       state: 'Maharashtra',
       stateHi: 'महाराष्ट्र',
-      targetSeats: 1250000,
-      sanctionedSeats: 1120000,
-      enrolledSeats: 980000,
+      targetSeats: Math.round(1250000 * combinedMult),
+      sanctionedSeats: Math.round(1120000 * combinedMult),
+      enrolledSeats: Math.round(980000 * combinedMult),
       utilizationRate: 87.5,
       placementRate: 74.2,
-      prioritySector: 'Capital Goods & Auto (Pune/Chakan)',
+      prioritySector: globalSector === 'semi' ? 'Semiconductor Tooling & Fab Support (Pune)' : globalSector === 'green' ? 'Solar & Wind Substation Tech (Nagpur)' : 'Capital Goods & Auto (Pune/Chakan)',
       status: 'On Track',
     },
     {
+      code: 'GJ',
       state: 'Gujarat',
       stateHi: 'गुजरात',
-      targetSeats: 980000,
-      sanctionedSeats: 910000,
-      enrolledSeats: 820000,
+      targetSeats: Math.round(980000 * combinedMult),
+      sanctionedSeats: Math.round(910000 * combinedMult),
+      enrolledSeats: Math.round(820000 * combinedMult),
       utilizationRate: 90.1,
       placementRate: 78.4,
-      prioritySector: 'Semiconductors & Chemicals (Dholera/Sanand)',
+      prioritySector: globalSector === 'green' ? 'Electrolyser & Renewable Logistics (Mundra)' : 'Semiconductors & Chemicals (Dholera/Sanand)',
       status: 'On Track',
     },
     {
+      code: 'TN',
       state: 'Tamil Nadu',
       stateHi: 'तमिलनाडु',
-      targetSeats: 1100000,
-      sanctionedSeats: 1040000,
-      enrolledSeats: 940000,
+      targetSeats: Math.round(1100000 * combinedMult),
+      sanctionedSeats: Math.round(1040000 * combinedMult),
+      enrolledSeats: Math.round(940000 * combinedMult),
       utilizationRate: 90.4,
       placementRate: 79.1,
-      prioritySector: 'Electronics & EV Hardware (Sriperumbudur)',
+      prioritySector: globalSector === 'semi' ? 'Semiconductor OSAT & Assembly (Sriperumbudur)' : 'Electronics & EV Hardware (Sriperumbudur)',
       status: 'On Track',
     },
     {
+      code: 'UP',
       state: 'Uttar Pradesh',
       stateHi: 'उत्तर प्रदेश',
-      targetSeats: 1650000,
-      sanctionedSeats: 1320000,
-      enrolledSeats: 1120000,
+      targetSeats: Math.round(1650000 * combinedMult),
+      sanctionedSeats: Math.round(1320000 * combinedMult),
+      enrolledSeats: Math.round(1120000 * combinedMult),
       utilizationRate: 84.8,
       placementRate: 64.5,
-      prioritySector: 'Defence Corridor & Traditional Crafts',
+      prioritySector: globalSector === 'mfg' ? 'Heavy Engineering (Kanpur/Lucknow)' : 'Defence Corridor & Traditional Crafts',
       status: 'Deficit',
     },
     {
+      code: 'KA',
       state: 'Karnataka',
       stateHi: 'कर्नाटक',
-      targetSeats: 850000,
-      sanctionedSeats: 820000,
-      enrolledSeats: 740000,
+      targetSeats: Math.round(850000 * combinedMult),
+      sanctionedSeats: Math.round(820000 * combinedMult),
+      enrolledSeats: Math.round(740000 * combinedMult),
       utilizationRate: 90.2,
       placementRate: 81.3,
       prioritySector: 'Aerospace & Precision Machining',
       status: 'On Track',
     },
     {
+      code: 'TS',
       state: 'Telangana',
       stateHi: 'तेलंगाना',
-      targetSeats: 620000,
-      sanctionedSeats: 590000,
-      enrolledSeats: 530000,
+      targetSeats: Math.round(620000 * combinedMult),
+      sanctionedSeats: Math.round(590000 * combinedMult),
+      enrolledSeats: Math.round(530000 * combinedMult),
       utilizationRate: 89.8,
       placementRate: 76.5,
       prioritySector: 'Life Sciences & EV Mobility',
       status: 'On Track',
     },
     {
+      code: 'HR',
       state: 'Haryana',
       stateHi: 'हरियाणा',
-      targetSeats: 580000,
-      sanctionedSeats: 510000,
-      enrolledSeats: 430000,
+      targetSeats: Math.round(580000 * combinedMult),
+      sanctionedSeats: Math.round(510000 * combinedMult),
+      enrolledSeats: Math.round(430000 * combinedMult),
       utilizationRate: 84.3,
       placementRate: 68.2,
       prioritySector: 'Logistics & Auto Ancillary',
       status: 'Deficit',
     },
     {
+      code: 'RJ',
       state: 'Rajasthan',
       stateHi: 'राजस्थान',
-      targetSeats: 720000,
-      sanctionedSeats: 640000,
-      enrolledSeats: 520000,
+      targetSeats: Math.round(720000 * combinedMult),
+      sanctionedSeats: Math.round(640000 * combinedMult),
+      enrolledSeats: Math.round(520000 * combinedMult),
       utilizationRate: 81.2,
       placementRate: 63.8,
       prioritySector: 'Solar & Renewable Infrastructure',
       status: 'Deficit',
     },
-  ]);
+  ];
 
-  // Derived metrics from simulator sliders
-  const totalBaseSeats = 8450000;
+  // Derived metrics from simulator sliders and global filters
+  const totalBaseSeats = Math.round(8450000 * combinedMult);
   const simulatedTargetSeats = Math.round(
     totalBaseSeats * (1 + (pmkvyGrowth * 0.4 + itiModernization * 0.35 + napsApprenticeship * 0.25) / 100)
   );
@@ -169,10 +190,17 @@ export const CapacityTargetView: React.FC<CapacityTargetViewProps> = ({
     );
   };
 
-  const filteredStates = stateRows.filter((row) =>
+  // Filtered and sorted states (matching global geo prioritized)
+  const filteredStates = baseStateRows.filter((row) =>
     row.state.toLowerCase().includes(searchState.toLowerCase()) ||
     row.prioritySector.toLowerCase().includes(searchState.toLowerCase())
-  );
+  ).sort((a, b) => {
+    if (globalGeo !== 'all') {
+      if (a.code === globalGeo && b.code !== globalGeo) return -1;
+      if (a.code !== globalGeo && b.code === globalGeo) return 1;
+    }
+    return 0;
+  });
 
   return (
     <div className="space-y-4">
@@ -441,9 +469,10 @@ export const CapacityTargetView: React.FC<CapacityTargetViewProps> = ({
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-800">
               {filteredStates.map((row) => (
-                <tr key={row.state} className="hover:bg-blue-50/40 transition-colors">
-                  <td className="py-3 px-4 font-bold text-slate-900">
-                    {language === 'en' ? row.state : row.stateHi}
+                <tr key={row.state} className={`transition-colors ${row.code === globalGeo ? 'bg-blue-50/80 border-l-4 border-l-[#0A3D62]' : 'hover:bg-blue-50/40'}`}>
+                  <td className="py-3 px-4 font-bold text-slate-900 flex items-center gap-1.5">
+                    {row.code === globalGeo && <span className="inline-block w-2 h-2 rounded-full bg-blue-600 animate-pulse" />}
+                    <span>{language === 'en' ? row.state : row.stateHi}</span>
                   </td>
                   <td className="py-3 px-3 text-slate-600 font-medium">
                     {row.prioritySector}

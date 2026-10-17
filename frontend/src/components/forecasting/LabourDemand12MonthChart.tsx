@@ -116,15 +116,42 @@ export const LabourDemand12MonthChart: React.FC<LabourDemand12MonthChartProps> =
     }
   };
 
+  // Dynamic sector multiplier
+  const sectorMultiplier = useMemo(() => {
+    const s = selectedSector.toLowerCase();
+    if (s.includes('semi') || s.includes('electronic')) return 0.82;
+    if (s.includes('mfg') || s.includes('machin') || s.includes('capital')) return 1.28;
+    if (s.includes('auto') || s.includes('ev')) return 1.12;
+    if (s.includes('green') || s.includes('renew') || s.includes('solar') || s.includes('hydro')) return 0.94;
+    if (s.includes('health') || s.includes('medic')) return 1.04;
+    if (s.includes('it') || s.includes('digit')) return 1.18;
+    if (s.includes('logis') || s.includes('supply')) return 0.92;
+    return 1.0;
+  }, [selectedSector]);
+
+  // Scaled 12-month demand points
+  const chartData = useMemo(() => {
+    return TWELVE_MONTH_DEMAND_FORECAST.map((d) => ({
+      ...d,
+      baselineDemand: Math.round(d.baselineDemand * sectorMultiplier),
+      acceleratedDemand: Math.round(d.acceleratedDemand * sectorMultiplier),
+      conservativeDemand: Math.round(d.conservativeDemand * sectorMultiplier),
+      greenTechDemand: Math.round(d.greenTechDemand * sectorMultiplier),
+      supplyCapacity: Math.round(d.supplyCapacity * sectorMultiplier),
+      confidenceLower: Math.round(d.confidenceLower * sectorMultiplier),
+      confidenceUpper: Math.round(d.confidenceUpper * sectorMultiplier),
+    }));
+  }, [sectorMultiplier]);
+
   // Computed summary statistics for active scenario
   const stats = useMemo(() => {
-    const values = TWELVE_MONTH_DEMAND_FORECAST.map((d) => getDemandValue(d, activeScenario));
+    const values = chartData.map((d) => getDemandValue(d, activeScenario));
     const peak = Math.max(...values);
     const peakIndex = values.indexOf(peak);
-    const peakMonth = TWELVE_MONTH_DEMAND_FORECAST[peakIndex]?.month;
+    const peakMonth = chartData[peakIndex]?.month;
     const total = values.reduce((acc, curr) => acc + curr, 0);
 
-    const deficits = TWELVE_MONTH_DEMAND_FORECAST.map((d) =>
+    const deficits = chartData.map((d) =>
       Math.max(0, getDemandValue(d, activeScenario) - d.supplyCapacity)
     );
     const avgDeficit = Math.round(deficits.reduce((acc, curr) => acc + curr, 0) / deficits.length);
@@ -140,7 +167,7 @@ export const LabourDemand12MonthChart: React.FC<LabourDemand12MonthChartProps> =
       avgDeficit,
       velocityPct,
     };
-  }, [activeScenario]);
+  }, [chartData, activeScenario]);
 
   // Custom Recharts Tooltip
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -375,7 +402,7 @@ export const LabourDemand12MonthChart: React.FC<LabourDemand12MonthChartProps> =
         <div className="h-[320px] sm:h-[380px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart
-              data={TWELVE_MONTH_DEMAND_FORECAST}
+              data={chartData}
               margin={{ top: 15, right: 15, left: 0, bottom: 5 }}
               onMouseMove={(e: any) => {
                 if (e && e.activeLabel) setHoveredMonth(e.activeLabel);

@@ -28,16 +28,25 @@ interface SkillDemandPlacementScatterPlotProps {
   language: Language;
   onPointSelect?: (point: HistoricalSkillPlacementPoint) => void;
   className?: string;
+  externalSectorFilter?: string;
 }
 
 export const SkillDemandPlacementScatterPlot: React.FC<SkillDemandPlacementScatterPlotProps> = ({
   language,
   onPointSelect,
   className = '',
+  externalSectorFilter,
 }) => {
   // State for filtering and display toggles
-  const [selectedSector, setSelectedSector] = useState<string>('all');
+  const [selectedSector, setSelectedSector] = useState<string>(externalSectorFilter || 'all');
   const [selectedYear, setSelectedYear] = useState<string>('all'); // 'all' | '2023' | '2024' | '2025'
+
+  // Update when externalSectorFilter changes
+  useEffect(() => {
+    if (externalSectorFilter) {
+      setSelectedSector(externalSectorFilter);
+    }
+  }, [externalSectorFilter]);
   const [showRegressionLine, setShowRegressionLine] = useState<boolean>(true);
   const [showParityLine, setShowParityLine] = useState<boolean>(true);
   const [showResiduals, setShowResiduals] = useState<boolean>(false);

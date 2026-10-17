@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Header } from './components/Header';
-import { Sidebar } from './components/Sidebar';
+import { SituationalMonitoringView } from './components/situational/SituationalMonitoringView';
 import { GlobalFilterBar } from './components/GlobalFilterBar';
 import { MissionCockpitView } from './components/mission/MissionCockpitView';
 import { NationalCommandCenterView } from './components/command/NationalCommandCenterView';
@@ -17,6 +17,7 @@ import { CapacityTargetView } from './components/capacity/CapacityTargetView';
 import { DataObservatoryView } from './components/data/DataObservatoryView';
 import { ReportsBriefsView } from './components/reports/ReportsBriefsView';
 import { HelpMethodologyView } from './components/help/HelpMethodologyView';
+import { OfficerEnablementView } from './components/enablement/OfficerEnablementView';
 import { TalentComparisonView } from './components/talent/TalentComparisonView';
 import { CommandPaletteModal } from './components/CommandPaletteModal';
 import { AiPolicyCopilot } from './components/copilot/AiPolicyCopilot';
@@ -66,17 +67,20 @@ export default function App() {
   const [showPolicyWeights, setShowPolicyWeights] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
 
-  // Global keyboard shortcut for Command Palette (Cmd+K / Ctrl+K)
+  // Global keyboard shortcuts (Cmd+K / Ctrl+K for Palette, Cmd+J / Ctrl+J for Copilot)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
         e.preventDefault();
         setShowCommandPalette((prev) => !prev);
+      } else if ((e.metaKey || e.ctrlKey) && (e.key === 'j' || e.key === 'J')) {
+        e.preventDefault();
+        setIsCopilotOpen(!isCopilotOpen);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [isCopilotOpen, setIsCopilotOpen]);
 
   // Toast State
   const [toast, setToast] = useState<ToastMessage | null>(null);
@@ -175,7 +179,11 @@ export default function App() {
         <main className="flex-1 px-2.5 sm:px-4 md:px-6 py-3 sm:py-5 max-w-[1700px] mx-auto space-y-3.5 sm:space-y-4 w-full">
           
           {/* Global Header Filter Bar (Affects EVERY page, shareable URL state, live recomputations) */}
-          {activeSidebarTab !== 'home' && (
+          {activeSidebarTab !== 'home' &&
+            activeSidebarTab !== 'situational' &&
+            activeSidebarTab !== 'data' &&
+            activeSidebarTab !== 'enablement' &&
+            activeSidebarTab !== 'help' && (
             <GlobalFilterBar
               language={language}
               onExportBrief={handleExportBrief}
@@ -292,7 +300,16 @@ export default function App() {
                 setToast({ id: Date.now().toString(), type, title, message });
               }}
             />
-          ) : activeSidebarTab === 'saturation' || activeSidebarTab === 'alerts' ? (
+          ) : activeSidebarTab === 'situational' ? (
+            <SituationalMonitoringView
+              language={language}
+              onNavigateHome={() => setActiveSidebarTab('mission')}
+              onNavigateToMissionCockpit={() => setActiveSidebarTab('mission')}
+              onShowToast={(title, message, type = 'success') => {
+                setToast({ id: Date.now().toString(), type, title, message });
+              }}
+            />
+          ) : activeSidebarTab === 'saturation' ? (
             <SaturationRankingView
               language={language}
               onNavigateHome={() => setActiveSidebarTab('mission')}
@@ -317,7 +334,7 @@ export default function App() {
                 setToast({ id: Date.now().toString(), type, title, message });
               }}
             />
-          ) : activeSidebarTab === 'reports' ? (
+          ) : activeSidebarTab === 'reports' || activeSidebarTab === 'alerts' ? (
             <ReportsBriefsView
               language={language}
               onNavigateHome={() => setActiveSidebarTab('mission')}
@@ -325,8 +342,8 @@ export default function App() {
                 setToast({ id: Date.now().toString(), type, title, message });
               }}
             />
-          ) : activeSidebarTab === 'help' ? (
-            <HelpMethodologyView
+          ) : activeSidebarTab === 'enablement' || activeSidebarTab === 'help' ? (
+            <OfficerEnablementView
               language={language}
               onNavigateHome={() => setActiveSidebarTab('mission')}
               onShowToast={(title, message, type = 'success') => {
@@ -446,6 +463,8 @@ export default function App() {
               title: 'Inspecting Trade Ledger',
               message: `Loaded econometric profile for ${payload}`,
             });
+          } else if (actionType === 'open-copilot') {
+            setIsCopilotOpen(true);
           } else if (actionType === 'open-cabinet') {
             setShowCabinetNote(true);
           } else if (actionType === 'open-weights') {
@@ -453,6 +472,44 @@ export default function App() {
           }
         }}
       />
+
+      {/* Floating AI Policy Copilot Panel */}
+      {isCopilotOpen && (
+        <AiPolicyCopilot
+          language={language}
+          isFloating={true}
+          onCloseFloating={() => setIsCopilotOpen(false)}
+          onExecuteAction={(actionType, payload) => {
+            if (actionType === 'navigate-tab') {
+              setActiveSidebarTab(payload);
+            } else if (actionType === 'open-cabinet') {
+              setShowCabinetNote(true);
+            } else if (actionType === 'open-weights') {
+              setShowPolicyWeights(true);
+            } else if (actionType === 'inspect-trade') {
+              setActiveSidebarTab('sector');
+            }
+          }}
+        />
+      )}
+
+      {/* Floating Copilot Launcher Button */}
+      {!isCopilotOpen && (
+        <button
+          onClick={() => setIsCopilotOpen(true)}
+          className="fixed bottom-6 right-6 z-40 flex items-center gap-2.5 px-4 py-2.5 bg-[#0B1F3A] hover:bg-[#142C4E] text-white rounded-full shadow-2xl border border-slate-700/60 hover:scale-105 active:scale-95 transition-all cursor-pointer group ring-2 ring-[#F28C28]/30"
+          title="Open AI Policy Copilot (Ctrl/Cmd + J)"
+        >
+          <div className="relative">
+            <Sparkles className="w-4 h-4 text-[#F28C28] animate-pulse" />
+            <span className="absolute -top-1 -right-1 w-2 h-2 bg-emerald-400 rounded-full animate-ping" />
+          </div>
+          <span className="text-xs font-bold tracking-wide">AI Copilot</span>
+          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/10 text-slate-300 font-semibold group-hover:bg-white/20">
+            ⌘J
+          </span>
+        </button>
+      )}
 
     </div>
   );

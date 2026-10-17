@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   ShieldAlert,
   Radio,
@@ -39,49 +39,59 @@ export const NationalCommandCenterView: React.FC<NationalCommandCenterViewProps>
   const setSelectedStateId = useDashboardStore((s) => s.setSelectedStateId);
   const setSelectedGeography = useDashboardStore((s) => s.setSelectedGeography);
 
+  const selectedSector = useDashboardStore((s) => s.selectedSector);
+  const selectedGeography = useDashboardStore((s) => s.selectedGeography);
+  const selectedScenario = useDashboardStore((s) => s.selectedScenario);
+
   const [activeLayer, setActiveLayer] = useState<'demand' | 'capacity' | 'shortage' | 'policy'>('shortage');
   const [sectorSearch, setSectorSearch] = useState('');
   const [lastFeedTime, setLastFeedTime] = useState('14:38:10 IST');
 
-  // Live War Room Feed state (auto-refreshes every 30s)
-  const [alertsFeed, setAlertsFeed] = useState([
-    {
-      id: 'f1',
-      time: '14:38:04 IST',
-      cluster: 'Pune Cluster (MH)',
-      trade: 'Advanced CNC 5-Axis Machinist',
-      gap: '-51,400 Seats',
-      severity: 'Critical',
-      action: 'PMKVY Sanction Transmitted',
-    },
-    {
-      id: 'f2',
-      time: '14:36:20 IST',
-      cluster: 'Dholera SIR (GJ)',
-      trade: 'Cleanroom Packaging Technician',
-      gap: '-28,600 Seats',
-      severity: 'Critical',
-      action: 'In-Situ ITI Lab Notified',
-    },
-    {
-      id: 'f3',
-      time: '14:34:11 IST',
-      cluster: 'Sriperumbudur (TN)',
-      trade: 'EV Battery Management Tech',
-      gap: '-35,500 Seats',
-      severity: 'High',
-      action: 'NAPS Quota Activated',
-    },
-    {
-      id: 'f4',
-      time: '14:31:45 IST',
-      cluster: 'Rajasthan Solar Parks',
-      trade: 'Solar PV Rooftop Installer',
-      gap: '-74,000 Seats',
-      severity: 'Critical',
-      action: 'PM Surya Ghar Allocation Approved',
-    },
-  ]);
+  // Scenario capacity & demand scaling
+  const scenarioCapacityMult = selectedScenario === 'optimistic' ? 1.25 : selectedScenario === 'conservative' ? 0.88 : 1.0;
+  const scenarioDemandMult = selectedScenario === 'optimistic' ? 1.08 : selectedScenario === 'conservative' ? 0.94 : 1.0;
+
+  // Geography initial alerts generator
+  const getInitialAlerts = () => {
+    if (selectedGeography === 'GJ') {
+      return [
+        { id: 'f2', time: '14:36:20 IST', cluster: 'Dholera SIR (GJ)', trade: 'Cleanroom Packaging Technician', gap: '-28,600 Seats', severity: 'Critical', action: 'In-Situ ITI Lab Notified' },
+        { id: 'f2b', time: '14:34:10 IST', cluster: 'Sanand Industrial Belt (GJ)', trade: 'Semiconductor Fab Operator', gap: '-19,400 Seats', severity: 'Critical', action: 'Micron Skill Academy Fast-Tracked' },
+        { id: 'f2c', time: '14:31:05 IST', cluster: 'Mundra Green Energy Port (GJ)', trade: 'Electrolyser Stack Assembler', gap: '-14,200 Seats', severity: 'High', action: 'PMKVY 4.0 Special Drive' },
+        { id: 'f1', time: '14:28:44 IST', cluster: 'Pune Cluster (MH)', trade: 'Advanced CNC 5-Axis Machinist', gap: '-51,400 Seats', severity: 'Critical', action: 'PMKVY Sanction Transmitted' },
+      ];
+    }
+    if (selectedGeography === 'TN') {
+      return [
+        { id: 'f3', time: '14:34:11 IST', cluster: 'Sriperumbudur (TN)', trade: 'EV Battery Management Tech', gap: '-35,500 Seats', severity: 'Critical', action: 'NAPS Quota Activated' },
+        { id: 'f3b', time: '14:32:00 IST', cluster: 'Hosur EV Hub (TN)', trade: 'Battery Cell Quality Inspector', gap: '-22,300 Seats', severity: 'High', action: 'Dual Training Apprenticeship Sanctioned' },
+        { id: 'f3c', time: '14:29:15 IST', cluster: 'Coimbatore Machine Tools (TN)', trade: 'Precision Tool & Die Maker', gap: '-18,100 Seats', severity: 'High', action: 'Govt ITI Modernization Drive' },
+        { id: 'f1', time: '14:25:40 IST', cluster: 'Pune Cluster (MH)', trade: 'Advanced CNC 5-Axis Machinist', gap: '-51,400 Seats', severity: 'Critical', action: 'PMKVY Sanction Transmitted' },
+      ];
+    }
+    if (selectedGeography === 'KA') {
+      return [
+        { id: 'f5', time: '14:38:12 IST', cluster: 'Bengaluru Aerospace Hub (KA)', trade: 'Avionics Wire Harness Specialist', gap: '-16,800 Seats', severity: 'Critical', action: 'HAL & Boeing Cohort Synced' },
+        { id: 'f5b', time: '14:35:40 IST', cluster: 'Peenya Industrial Estate (KA)', trade: 'CNC Multi-Axis Milling Tech', gap: '-24,500 Seats', severity: 'High', action: 'State Skill Mission Mobilized' },
+        { id: 'f5c', time: '14:31:10 IST', cluster: 'Mysuru ESDM Cluster (KA)', trade: 'PCB Surface Mount Specialist', gap: '-12,300 Seats', severity: 'Elevated', action: 'NCVET Curriculum Approved' },
+        { id: 'f2', time: '14:28:00 IST', cluster: 'Dholera SIR (GJ)', trade: 'Cleanroom Packaging Technician', gap: '-28,600 Seats', severity: 'Critical', action: 'In-Situ ITI Lab Notified' },
+      ];
+    }
+    return [
+      { id: 'f1', time: '14:38:04 IST', cluster: 'Pune Cluster (MH)', trade: 'Advanced CNC 5-Axis Machinist', gap: '-51,400 Seats', severity: 'Critical', action: 'PMKVY Sanction Transmitted' },
+      { id: 'f2', time: '14:36:20 IST', cluster: 'Dholera SIR (GJ)', trade: 'Cleanroom Packaging Technician', gap: '-28,600 Seats', severity: 'Critical', action: 'In-Situ ITI Lab Notified' },
+      { id: 'f3', time: '14:34:11 IST', cluster: 'Sriperumbudur (TN)', trade: 'EV Battery Management Tech', gap: '-35,500 Seats', severity: 'High', action: 'NAPS Quota Activated' },
+      { id: 'f4', time: '14:31:45 IST', cluster: 'Rajasthan Solar Parks', trade: 'Solar PV Rooftop Installer', gap: '-74,000 Seats', severity: 'Critical', action: 'PM Surya Ghar Allocation Approved' },
+    ];
+  };
+
+  // Live War Room Feed state
+  const [alertsFeed, setAlertsFeed] = useState(getInitialAlerts);
+
+  // Re-seed alerts when geography or sector changes
+  useEffect(() => {
+    setAlertsFeed(getInitialAlerts());
+  }, [selectedGeography, selectedSector]);
 
   // Periodic 30s auto-refresh
   useEffect(() => {
@@ -93,30 +103,72 @@ export const NationalCommandCenterView: React.FC<NationalCommandCenterViewProps>
       const incoming = {
         id: `f-${Date.now()}`,
         time: timeStr,
-        cluster: 'Bengaluru Aerospace Hub (KA)',
-        trade: 'Avionics Wire Harness Specialist',
-        gap: '-12,800 Seats',
-        severity: 'Elevated',
-        action: 'HAL & Boeing Cohort Synced',
+        cluster: selectedGeography === 'GJ' ? 'Dholera Fab Cluster (GJ)' : selectedGeography === 'TN' ? 'Sriperumbudur Hub (TN)' : selectedGeography === 'KA' ? 'Bengaluru Tech Corridor (KA)' : 'Pune Industrial Belt (MH)',
+        trade: selectedSector === 'semi' ? 'Semiconductor Metrology Specialist' : selectedSector === 'green' ? 'Electrolyser Maintenance Engineer' : selectedSector === 'auto' ? 'EV Battery Thermal Tech' : 'Advanced 5-Axis CNC Machinist',
+        gap: selectedScenario === 'optimistic' ? '-18,200 Seats' : '-34,600 Seats',
+        severity: 'Critical',
+        action: 'Autonomous Allocation Approved',
       };
 
-      setAlertsFeed((prev) => [incoming, ...prev.slice(0, 4)]);
+      setAlertsFeed((prev) => [incoming, ...prev.slice(0, 3)]);
     }, 30000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [selectedGeography, selectedSector, selectedScenario]);
 
-  // National Sector scorecard data
-  const sectorScorecard = [
-    { sector: 'Green Hydrogen & Clean Energy', demand: 185000, capacity: 111000, gap: '-74,000', gapPct: 40.0, status: 'Acute Deficit', trend: '+18.4%' },
-    { sector: 'Capital Goods & Precision Machining', demand: 168000, capacity: 116600, gap: '-51,400', gapPct: 30.6, status: 'Acute Deficit', trend: '+14.2%' },
-    { sector: 'Electronics & Semiconductor (ESDM)', demand: 98000, capacity: 69400, gap: '-28,600', gapPct: 29.2, status: 'Acute Deficit', trend: '+22.5%' },
-    { sector: 'Automotive & Clean Mobility (EV)', demand: 142000, capacity: 106500, gap: '-35,500', gapPct: 25.0, status: 'High Shortage', trend: '+11.8%' },
-    { sector: 'Healthcare & Nursing Allied Services', demand: 128000, capacity: 86000, gap: '-42,000', gapPct: 32.8, status: 'High Shortage', trend: '+9.4%' },
-    { sector: 'IT-ITeS & Digital Services', demand: 110000, capacity: 172000, gap: '+62,000', gapPct: -56.4, status: 'Saturated', trend: '-8.2%' },
-    { sector: 'Apparel & Garment Manufacturing', demand: 86000, capacity: 134000, gap: '+48,000', gapPct: -55.8, status: 'Saturated', trend: '-6.5%' },
-    { sector: 'Logistics & Supply Chain Operations', demand: 92000, capacity: 84000, gap: '-8,000', gapPct: 8.7, status: 'Near Balance', trend: '+3.2%' },
-  ].filter((s) => s.sector.toLowerCase().includes(sectorSearch.toLowerCase()));
+  // Dynamic National Sector scorecard data
+  const baseSectors = [
+    { code: 'green', sector: 'Green Hydrogen & Clean Energy', baseDemand: 185000, baseCapacity: 111000, trend: '+18.4%' },
+    { code: 'mfg', sector: 'Capital Goods & Precision Machining', baseDemand: 168000, baseCapacity: 116600, trend: '+14.2%' },
+    { code: 'semi', sector: 'Electronics & Semiconductor (ESDM)', baseDemand: 98000, baseCapacity: 69400, trend: '+22.5%' },
+    { code: 'auto', sector: 'Automotive & Clean Mobility (EV)', baseDemand: 142000, baseCapacity: 106500, trend: '+11.8%' },
+    { code: 'health', sector: 'Healthcare & Nursing Allied Services', baseDemand: 128000, baseCapacity: 86000, trend: '+9.4%' },
+    { code: 'it', sector: 'IT-ITeS & Digital Services', baseDemand: 110000, baseCapacity: 172000, trend: '-8.2%' },
+    { code: 'textiles', sector: 'Apparel & Garment Manufacturing', baseDemand: 86000, baseCapacity: 134000, trend: '-6.5%' },
+    { code: 'logistics', sector: 'Logistics & Supply Chain Operations', baseDemand: 92000, baseCapacity: 84000, trend: '+3.2%' },
+  ];
+
+  const sectorScorecard = useMemo(() => {
+    let list = baseSectors.map((s) => {
+      const demand = Math.round(s.baseDemand * scenarioDemandMult);
+      const capacity = Math.round(s.baseCapacity * scenarioCapacityMult);
+      const net = capacity - demand;
+      const gapPct = Number((((demand - capacity) / demand) * 100).toFixed(1));
+      let status = 'Near Balance';
+      if (gapPct >= 25) status = 'Acute Deficit';
+      else if (gapPct >= 10) status = 'High Shortage';
+      else if (gapPct <= -20) status = 'Saturated';
+
+      const gapStr = net < 0 ? `-${Math.abs(net).toLocaleString('en-IN')}` : `+${net.toLocaleString('en-IN')}`;
+
+      return {
+        code: s.code,
+        sector: s.sector,
+        demand,
+        capacity,
+        gap: gapStr,
+        gapPct,
+        status,
+        trend: s.trend,
+        isPriority: selectedSector !== 'all' && (s.code === selectedSector || s.code === 'semi' && selectedSector.includes('semi')),
+      };
+    });
+
+    if (sectorSearch.trim()) {
+      list = list.filter((s) => s.sector.toLowerCase().includes(sectorSearch.toLowerCase()));
+    }
+
+    // Sort matching sector to the top if selected
+    if (selectedSector !== 'all') {
+      list.sort((a, b) => {
+        if (a.isPriority && !b.isPriority) return -1;
+        if (!a.isPriority && b.isPriority) return 1;
+        return 0;
+      });
+    }
+
+    return list;
+  }, [scenarioDemandMult, scenarioCapacityMult, sectorSearch, selectedSector]);
 
   const dict = {
     en: {
@@ -355,12 +407,13 @@ export const NationalCommandCenterView: React.FC<NationalCommandCenterViewProps>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-mono">
-              {sectorScorecard.map((row, idx) => {
+              {sectorScorecard.map((row: any, idx: number) => {
                 const isShortage = row.gap.startsWith('-');
                 return (
-                  <tr key={idx} className="hover:bg-slate-50 transition-colors">
-                    <td className="py-2.5 px-3 font-sans font-semibold text-slate-900">
-                      {row.sector}
+                  <tr key={idx} className={`hover:bg-slate-50 transition-colors ${row.isPriority ? 'bg-blue-50/70 border-l-4 border-l-[#0A3D62]' : ''}`}>
+                    <td className="py-2.5 px-3 font-sans font-semibold text-slate-900 flex items-center gap-1.5">
+                      {row.isPriority && <span className="inline-block w-2 h-2 rounded-full bg-blue-600 animate-pulse shrink-0" />}
+                      <span>{row.sector}</span>
                     </td>
                     <td className="py-2.5 px-3 text-right text-slate-900 font-bold">
                       {formatIndianNumber(row.demand)}

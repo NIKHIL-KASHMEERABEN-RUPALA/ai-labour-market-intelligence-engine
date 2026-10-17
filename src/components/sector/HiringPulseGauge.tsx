@@ -5,40 +5,48 @@ import { formatIndianNumber } from '../../utils/formatters';
 
 interface HiringPulseGaugeProps {
   language: Language;
+  pulse?: {
+    multiplier: string;
+    pressureStatus: string;
+    ncsCount: string;
+    portalsCount: string;
+    napsCount: string;
+    timeToHire: string;
+  };
 }
 
-export const HiringPulseGauge: React.FC<HiringPulseGaugeProps> = ({ language }) => {
+export const HiringPulseGauge: React.FC<HiringPulseGaugeProps> = ({ language, pulse: customPulse }) => {
   const dict = {
     en: {
       title: 'Real-Time Industry Hiring Pulse',
       liveBadge: 'Live Telemetry',
-      multiplier: '1.82x',
+      multiplier: customPulse?.multiplier || '1.82x',
       multiplierLabel: 'Above Baseline Pressure',
-      pressureStatus: 'Industry Hiring Pressure: High',
+      pressureStatus: customPulse?.pressureStatus || 'Industry Hiring Pressure: High',
       ncsLabel: 'National Career Service (NCS)',
-      ncsActive: '357,400 active',
+      ncsActive: customPulse?.ncsCount || '357,400 active',
       portalsLabel: 'Naukri, Indeed & Monster Aggregator',
-      portalsActive: '481,200 active',
+      portalsActive: customPulse?.portalsCount || '481,200 active',
       napsLabel: 'Apprenticeship Portal (NAPS)',
-      napsActive: '184,800 posted',
+      napsActive: customPulse?.napsCount || '184,800 posted',
       timeToHireLabel: 'Average Time-to-Hire (Critical Trades)',
-      timeToHireVal: '48 Days',
+      timeToHireVal: customPulse?.timeToHire || '48 Days',
       timeToHireNormal: 'Normal Benchmark: 21 days',
     },
     hi: {
       title: 'उद्योग भर्ती का वास्तविक समय पल्स',
       liveBadge: 'लाइव टेलीमेट्री',
-      multiplier: '1.82x',
+      multiplier: customPulse?.multiplier || '1.82x',
       multiplierLabel: 'आधारभूत दबाव से ऊपर',
-      pressureStatus: 'उद्योग भर्ती दबाव: उच्च',
+      pressureStatus: customPulse?.pressureStatus || 'उद्योग भर्ती दबाव: उच्च',
       ncsLabel: 'राष्ट्रीय करियर सेवा (NCS)',
-      ncsActive: '3,57,400 सक्रिय',
+      ncsActive: customPulse?.ncsCount || '3,57,400 सक्रिय',
       portalsLabel: 'निजी जॉब पोर्टल एग्रीगेटर',
-      portalsActive: '4,81,200 सक्रिय',
+      portalsActive: customPulse?.portalsCount || '4,81,200 सक्रिय',
       napsLabel: 'शिक्षुता पोर्टल (NAPS)',
-      napsActive: '1,84,800 पोस्टेड',
+      napsActive: customPulse?.napsCount || '1,84,800 पोस्टेड',
       timeToHireLabel: 'औसत भर्ती समय (महत्वपूर्ण व्यवसाय)',
-      timeToHireVal: '48 दिन',
+      timeToHireVal: customPulse?.timeToHire || '48 दिन',
       timeToHireNormal: 'सामान्य बेंचमार्क: 21 दिन',
     },
   };

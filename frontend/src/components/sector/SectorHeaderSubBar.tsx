@@ -7,6 +7,10 @@ interface SectorHeaderSubBarProps {
   onNavigateHome: () => void;
   onOpenSectorBrief: () => void;
   onExportReport: () => void;
+  sectorTitle?: string;
+  sectorTitleHi?: string;
+  councilCode?: string;
+  pliBadge?: string;
 }
 
 export const SectorHeaderSubBar: React.FC<SectorHeaderSubBarProps> = ({
@@ -14,28 +18,33 @@ export const SectorHeaderSubBar: React.FC<SectorHeaderSubBarProps> = ({
   onNavigateHome,
   onOpenSectorBrief,
   onExportReport,
+  sectorTitle: customSectorTitle,
+  sectorTitleHi: customSectorTitleHi,
+  councilCode: customCouncilCode,
+  pliBadge: customPliBadge,
 }) => {
   const dict = {
     en: {
       breadcrumbRoot: 'National Overview',
       breadcrumbCurrent: 'Sector Intelligence',
-      sectorTitle: 'Manufacturing & Capital Goods (MSDE/CGSC)',
-      sectorTitleHi: 'विनिर्माण एवं पूंजीगत वस्तु क्षेत्र',
-      pliBadge: 'PLI AUTO • CAPITAL GOODS • SEMI-EQUIP: ON-TRACK',
+      sectorTitle: customSectorTitle || 'Manufacturing & Capital Goods (MSDE/CGSC)',
+      sectorTitleHi: customSectorTitleHi || 'विनिर्माण एवं पूंजीगत वस्तु क्षेत्र',
+      pliBadge: customPliBadge || 'PLI AUTO • CAPITAL GOODS • SEMI-EQUIP: ON-TRACK',
       policyBriefBtn: 'Policy Brief (PDF)',
       sscBriefBtn: 'Generate SSC Brief',
     },
     hi: {
       breadcrumbRoot: 'राष्ट्रीय अवलोकन',
       breadcrumbCurrent: 'क्षेत्रीय आसूचना',
-      sectorTitle: 'विनिर्माण एवं पूंजीगत वस्तु (MSDE/CGSC)',
-      sectorTitleHi: 'Manufacturing & Capital Goods',
-      pliBadge: 'पीएलआई ऑटो • पूंजीगत वस्तु • सेमी-उपकरण: सक्रिय',
+      sectorTitle: customSectorTitleHi || customSectorTitle || 'विनिर्माण एवं पूंजीगत वस्तु (MSDE/CGSC)',
+      sectorTitleHi: customSectorTitle || 'Manufacturing & Capital Goods',
+      pliBadge: customPliBadge || 'पीएलआई ऑटो • पूंजीगत वस्तु • सेमी-उपकरण: सक्रिय',
       policyBriefBtn: 'नीति संक्षेपिका (पीडीएफ)',
       sscBriefBtn: 'एसएससी संक्षेपिका बनाएं',
     },
   };
   const t = dict[language === 'hi' ? 'hi' : 'en'];
+  const activeCode = customCouncilCode || 'CGSC-2026';
 
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-200">
@@ -57,7 +66,7 @@ export const SectorHeaderSubBar: React.FC<SectorHeaderSubBarProps> = ({
             {t.sectorTitle}
           </h1>
           <span className="text-xs font-semibold text-slate-500">
-            {language === 'en' ? 'कौशल परिषद कोड: CGSC-2026' : 'Sector Skill Council Code: CGSC-2026'}
+            {language === 'en' ? `Council Code: ${activeCode}` : `कौशल परिषद कोड: ${activeCode}`}
           </span>
         </div>
       </div>

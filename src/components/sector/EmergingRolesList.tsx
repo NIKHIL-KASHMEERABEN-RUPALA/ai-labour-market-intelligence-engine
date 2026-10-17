@@ -6,12 +6,15 @@ import { Sparkles, ArrowRight, BookOpen, Cpu } from 'lucide-react';
 interface EmergingRolesListProps {
   language: Language;
   onSanctionRole?: (role: EmergingRole) => void;
+  roles?: EmergingRole[];
 }
 
 export const EmergingRolesList: React.FC<EmergingRolesListProps> = ({
   language,
   onSanctionRole,
+  roles: customRoles,
 }) => {
+  const activeRoles = customRoles || EMERGING_ROLES;
   const dict = {
     en: {
       title: 'Emerging Roles Detected',
@@ -59,7 +62,7 @@ export const EmergingRolesList: React.FC<EmergingRolesListProps> = ({
 
         {/* Roles List */}
         <div className="space-y-3 pt-3">
-          {EMERGING_ROLES.map((role) => (
+          {activeRoles.map((role) => (
             <div
               key={role.id}
               className="p-3 rounded-xl bg-slate-50 hover:bg-blue-50/40 border border-slate-200/80 hover:border-blue-200 transition-all text-xs"

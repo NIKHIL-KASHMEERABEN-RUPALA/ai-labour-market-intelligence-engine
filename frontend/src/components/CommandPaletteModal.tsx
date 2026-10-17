@@ -223,6 +223,15 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
 
     // Quick Actions
     {
+      id: 'act-copilot',
+      category: 'Action',
+      title: 'Open AI Policy Copilot (Grounded RAG & Tool Calling)',
+      titleHi: 'एआई पॉलिसी कोपायलट खोलें (ग्राउंडेड आरएजी)',
+      subtitle: 'Natural language queries, district gap analysis, and policy memo synthesis (⌘J)',
+      icon: Sparkles,
+      actionType: 'open-copilot',
+    },
+    {
       id: 'act-cabinet',
       category: 'Action',
       title: 'Generate Cabinet Note (CCEA Briefing Slide)',

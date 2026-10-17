@@ -81,20 +81,18 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { id: 'home', label: 'Home Landing', labelHi: 'होम लैंडिंग', icon: Home, category: 'core' },
   { id: 'mission', label: 'Mission Cockpit', labelHi: 'मिशन कॉकपिट', icon: Shield, badge: 'LIVE', category: 'core' },
   { id: 'command', label: 'National Command Center', labelHi: 'राष्ट्रीय कमान केंद्र', icon: LayoutDashboard, category: 'core' },
   { id: 'sector', label: 'Sector Intelligence', labelHi: 'क्षेत्रीय आसूचना', icon: Layers, category: 'core' },
   { id: 'district', label: 'District War Room', labelHi: 'जिला वार-रूम', icon: MapPin, badge: 'PUNE', category: 'war_rooms' },
   { id: 'forecasting', label: 'Forecasting & Scenario', labelHi: 'पूर्वानुमान एवं परिदृश्य', icon: TrendingUp, category: 'war_rooms' },
-  { id: 'saturation', label: 'Situational & Monitoring', labelHi: 'स्थिति एवं प्रारंभिक चेतावनी', icon: AlertTriangle, badge: 'CRITICAL', badgeColor: 'bg-red-500/20 text-red-300 border-red-500/40', category: 'war_rooms' },
+  { id: 'situational', label: 'Situational & Monitoring', labelHi: 'स्थिति एवं निगरानी', icon: AlertTriangle, badge: 'CRITICAL', badgeColor: 'bg-red-500/20 text-red-300 border-red-500/40', category: 'war_rooms' },
   { id: 'capacity', label: 'Capacity & Target Setting', labelHi: 'क्षमता एवं लक्ष्य अनुकूलक', icon: Target, category: 'war_rooms' },
   { id: 'data', label: 'Data Observatory', labelHi: 'डेटा वेधशाला', icon: Database, category: 'ai_tools' },
-  { id: 'reports', label: 'Government Decision Support & Briefing Hub', labelHi: 'सरकारी निर्णय समर्थन एवं ब्रीफिंग हब', icon: FileText, badge: 'CABINET', badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/40', category: 'governance' },
-  { id: 'talent', label: 'Talent Comparison View', labelHi: 'प्रतिभा प्रवासन गलियारे', icon: Building, category: 'ai_tools' },
-  { id: 'api', label: 'OpenAPI Console', labelHi: 'ओपन एपीआई कंसोल', icon: Terminal, category: 'governance' },
-  { id: 'methodology', label: 'Methodology', labelHi: 'कार्यप्रणाली', icon: BookOpen, category: 'governance' },
-  { id: 'settings', label: 'Accessibility & Settings', labelHi: 'पहुंच एवं सेटिंग्स', icon: Settings, category: 'governance' },
+  { id: 'alerts', label: 'Reports & Alerts', labelHi: 'रिपोर्ट्स एवं अलर्ट्स', icon: FileText, category: 'governance' },
+  { id: 'talent', label: 'Talent Comparison View', labelHi: 'प्रतिभा तुलना दृश्य', icon: Building, category: 'ai_tools' },
+  { id: 'reports', label: 'Government Decision Support & Briefing Hub', labelHi: 'सरकारी निर्णय समर्थन एवं ब्रीफिंग हब', icon: Award, badge: 'CABINET', badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/40', category: 'governance' },
+  { id: 'enablement', label: 'Officer Enablement', labelHi: 'अधिकारी सक्षमीकरण', icon: BookOpen, badge: 'GIGW 3.0', badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40', category: 'governance' },
 ];
 
 export const Header: React.FC<HeaderProps> = ({

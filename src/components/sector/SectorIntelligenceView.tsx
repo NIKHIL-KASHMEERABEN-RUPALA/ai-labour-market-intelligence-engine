@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { SectorHeaderSubBar } from './SectorHeaderSubBar';
 import { SectorFilterBar } from './SectorFilterBar';
 import { SectorKpiRow } from './SectorKpiRow';
@@ -11,6 +11,8 @@ import { CurriculumInsightsGrid } from './CurriculumInsightsGrid';
 import { SectorBriefModal } from './SectorBriefModal';
 import { AiJobNormaliserPipeline } from './AiJobNormaliserPipeline';
 import { Language, DistrictHeatmapRow, DistrictHeatmapCell, TradeCapacityData, EmergingRole, CurriculumInsight } from '../../types';
+import { getSectorIntelligenceData } from '../../data/sectorMockData';
+import { useDashboardStore } from '../../stores/dashboardStore';
 
 interface SectorIntelligenceViewProps {
   language: Language;
@@ -25,18 +27,45 @@ export const SectorIntelligenceView: React.FC<SectorIntelligenceViewProps> = ({
   onShowToast,
   onRequestActionPlanForCluster,
 }) => {
-  const [subSector, setSubSector] = useState('all');
-  const [horizon, setHorizon] = useState('12m');
+  const globalSector = useDashboardStore((s) => s.selectedSector);
+  const globalGeo = useDashboardStore((s) => s.selectedGeography);
+  const globalHorizon = useDashboardStore((s) => s.selectedTimeHorizon);
+  const globalScenario = useDashboardStore((s) => s.selectedScenario);
+  const setSelectedSector = useDashboardStore((s) => s.setSelectedSector);
+
+  const [subSector, setSubSector] = useState(globalSector || 'mfg');
+  const [horizon, setHorizon] = useState(globalHorizon || '12m');
   const [nsqfLevel, setNsqfLevel] = useState('all');
   const [showSectorBrief, setShowSectorBrief] = useState(false);
+
+  // Keep in sync with global store
+  useEffect(() => {
+    if (globalSector) setSubSector(globalSector);
+  }, [globalSector]);
+
+  useEffect(() => {
+    if (globalHorizon) setHorizon(globalHorizon);
+  }, [globalHorizon]);
+
+  // Compute dynamic sector intelligence dataset
+  const sectorData = useMemo(() => {
+    return getSectorIntelligenceData(subSector, globalGeo, horizon, globalScenario);
+  }, [subSector, globalGeo, horizon, globalScenario]);
+
+  // Filter trades by NSQF level if selected
+  const filteredTrades = useMemo(() => {
+    if (nsqfLevel === 'all') return sectorData.tradesCapacity;
+    const targetLvl = parseInt(nsqfLevel, 10);
+    return sectorData.tradesCapacity.filter((t) => t.nsqfLevel === targetLvl);
+  }, [sectorData.tradesCapacity, nsqfLevel]);
 
   // Handle report export
   const handleExportReport = () => {
     onShowToast(
-      language === 'en' ? 'Compiling Sector Intelligence Report' : 'क्षेत्रीय आसूचना रिपोर्ट संकलित की जा रही है',
+      language === 'en' ? `Compiling ${sectorData.title} Report` : `${sectorData.title} रिपोर्ट संकलित की जा रही है`,
       language === 'en'
-        ? 'Extracting multi-source employer demand logs for Manufacturing & Capital Goods (CGSC)...'
-        : 'विनिर्माण एवं पूंजीगत वस्तु क्षेत्र हेतु बहु-स्रोत मांग डेटा निकाला जा रहा है...',
+        ? `Extracting multi-source employer demand logs for ${sectorData.title}...`
+        : 'क्षेत्रीय आसूचना डेटा निकाला जा रहा है...',
       'info'
     );
 
@@ -44,8 +73,8 @@ export const SectorIntelligenceView: React.FC<SectorIntelligenceViewProps> = ({
       onShowToast(
         language === 'en' ? 'Sector Dossier Ready' : 'क्षेत्रीय दस्तावेज तैयार',
         language === 'en'
-          ? 'MSDE-CGSC-MANUFACTURING-REPORT-2026.pdf ready for ministerial circulation.'
-          : 'दस्तावेज MSDE-CGSC-MANUFACTURING-REPORT-2026.pdf डाउनलोड हेतु उपलब्ध है।',
+          ? `MSDE-${sectorData.councilCode}-REPORT-2026.pdf ready for ministerial circulation.`
+          : 'दस्तावेज डाउनलोड हेतु उपलब्ध है।',
         'success'
       );
     }, 1200);
@@ -127,15 +156,22 @@ export const SectorIntelligenceView: React.FC<SectorIntelligenceViewProps> = ({
         onNavigateHome={onNavigateHome}
         onOpenSectorBrief={() => setShowSectorBrief(true)}
         onExportReport={handleExportReport}
+        sectorTitle={sectorData.title}
+        sectorTitleHi={sectorData.titleHi}
+        councilCode={sectorData.councilCode}
+        pliBadge={sectorData.pliBadge}
       />
 
       {/* 2. Top Filter Bar */}
       <SectorFilterBar
         language={language}
         subSector={subSector}
-        onSubSectorChange={setSubSector}
+        onSubSectorChange={(s) => {
+          setSubSector(s);
+          setSelectedSector(s);
+        }}
         horizon={horizon}
-        onHorizonChange={setHorizon}
+        onHorizonChange={(val) => setHorizon(val as any)}
         nsqfLevel={nsqfLevel}
         onNsqfLevelChange={setNsqfLevel}
         onExportReport={handleExportReport}
@@ -145,6 +181,7 @@ export const SectorIntelligenceView: React.FC<SectorIntelligenceViewProps> = ({
       {/* 3. Top 4 Large KPI Cards */}
       <SectorKpiRow
         language={language}
+        kpis={sectorData.kpis}
         onCardClick={(id) => {
           if (id === 'gap') {
             setShowSectorBrief(true);
@@ -159,12 +196,14 @@ export const SectorIntelligenceView: React.FC<SectorIntelligenceViewProps> = ({
           {/* Trade Capacity vs Demand Trajectory */}
           <TradeCapacityBarChart
             language={language}
+            trades={filteredTrades}
             onTradeClick={handleTradeClick}
           />
 
           {/* District × Trade Deficit Heatmap Matrix */}
           <DistrictHeatmapMatrix
             language={language}
+            heatmapData={sectorData.heatmapRows}
             onCellClick={handleHeatmapCellClick}
             onViewAllDistricts={() => setShowSectorBrief(true)}
           />
@@ -173,16 +212,23 @@ export const SectorIntelligenceView: React.FC<SectorIntelligenceViewProps> = ({
         {/* Right Column (5 cols): Hiring Pulse Gauge + Emerging Roles + Spotlight */}
         <div className="lg:col-span-5 space-y-4">
           {/* Real-Time Industry Hiring Pulse */}
-          <HiringPulseGauge language={language} />
+          <HiringPulseGauge
+            language={language}
+            pulse={sectorData.hiringPulse}
+          />
 
           {/* Emerging Job Roles Detected */}
           <EmergingRolesList
             language={language}
+            roles={sectorData.emergingRoles}
             onSanctionRole={handleSanctionRole}
           />
 
           {/* Industry Spotlight Photo Card */}
-          <IndustrySpotlightCard language={language} />
+          <IndustrySpotlightCard
+            language={language}
+            spotlight={sectorData.industrySpotlight}
+          />
         </div>
       </div>
 

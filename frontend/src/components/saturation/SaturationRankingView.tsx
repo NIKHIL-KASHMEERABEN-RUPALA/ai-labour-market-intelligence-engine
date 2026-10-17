@@ -26,16 +26,31 @@ interface SaturationRankingViewProps {
   onShowToast: (title: string, message: string, type?: 'success' | 'info' | 'warning') => void;
 }
 
+import { useDashboardStore } from '../../stores/dashboardStore';
+
 export const SaturationRankingView: React.FC<SaturationRankingViewProps> = ({
   language,
   onNavigateHome,
   onNavigateToTargetSetting,
   onShowToast,
 }) => {
+  const globalSector = useDashboardStore((s) => s.selectedSector);
+  const globalGeo = useDashboardStore((s) => s.selectedGeography);
+  const globalScenario = useDashboardStore((s) => s.selectedScenario);
+
   // Filter States
-  const [selectedJurisdiction, setSelectedJurisdiction] = useState('all');
-  const [selectedSector, setSelectedSector] = useState('all');
+  const [selectedJurisdiction, setSelectedJurisdiction] = useState(globalGeo || 'all');
+  const [selectedSector, setSelectedSector] = useState(globalSector || 'all');
   const [thresholdPct, setThresholdPct] = useState(15); // ± 15% Gap
+
+  // Sync when global filters change
+  useEffect(() => {
+    if (globalSector) setSelectedSector(globalSector);
+  }, [globalSector]);
+
+  useEffect(() => {
+    if (globalGeo) setSelectedJurisdiction(globalGeo);
+  }, [globalGeo]);
 
   // Sort States
   const [oversupplySortBy, setOversupplySortBy] = useState<'speed' | 'volume' | 'risk'>('speed');
@@ -49,8 +64,22 @@ export const SaturationRankingView: React.FC<SaturationRankingViewProps> = ({
   const [detailType, setDetailType] = useState<'oversupply' | 'shortage'>('oversupply');
   const [showAlertDigest, setShowAlertDigest] = useState(false);
 
-  // Live Metrics & Trades state (supports periodic live simulation)
-  const [metrics, setMetrics] = useState<SaturationSummaryMetrics>(SATURATION_SUMMARY_METRICS);
+  // Dynamic metrics derived from filters
+  const scenarioExposureMult = globalScenario === 'optimistic' ? 0.78 : globalScenario === 'conservative' ? 1.25 : 1.0;
+  const sectorExposureMult = selectedSector === 'semi' ? 0.85 : selectedSector === 'green' ? 1.15 : selectedSector === 'mfg' ? 1.2 : 1.0;
+
+  // Live Metrics & Trades state
+  const [metrics, setMetrics] = useState<SaturationSummaryMetrics>({
+    ...SATURATION_SUMMARY_METRICS,
+    totalEconomicExposureCrores: Math.round(SATURATION_SUMMARY_METRICS.totalEconomicExposureCrores * scenarioExposureMult * sectorExposureMult),
+  });
+
+  useEffect(() => {
+    setMetrics({
+      ...SATURATION_SUMMARY_METRICS,
+      totalEconomicExposureCrores: Math.round(SATURATION_SUMMARY_METRICS.totalEconomicExposureCrores * scenarioExposureMult * sectorExposureMult),
+    });
+  }, [scenarioExposureMult, sectorExposureMult]);
   const [oversupplyTrades, setOversupplyTrades] = useState<OversupplyTradeItem[]>(OVERSUPPLY_TRADES);
   const [shortageTrades, setShortageTrades] = useState<ShortageTradeItem[]>(SHORTAGE_TRADES);
 

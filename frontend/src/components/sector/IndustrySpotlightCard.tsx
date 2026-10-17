@@ -4,22 +4,28 @@ import { Language } from '../../types';
 
 interface IndustrySpotlightCardProps {
   language: Language;
+  spotlight?: {
+    title: string;
+    location: string;
+    funding: string;
+    statLabel: string;
+  };
 }
 
-export const IndustrySpotlightCard: React.FC<IndustrySpotlightCardProps> = ({ language }) => {
+export const IndustrySpotlightCard: React.FC<IndustrySpotlightCardProps> = ({ language, spotlight: customSpotlight }) => {
   const dict = {
     en: {
-      centerTitle: 'Advanced Dual-Apprenticeship Training Center',
-      location: 'Jamshedpur / Pune Mega Clusters',
-      funding: 'Jointly funded with Tata Motors & Capital Goods Skill Council',
-      statLabel: '400 High-Voltage Battery & Cobot Trainees Inducted This Month',
+      centerTitle: customSpotlight?.title || 'Advanced Dual-Apprenticeship Training Center',
+      location: customSpotlight?.location || 'Jamshedpur / Pune Mega Clusters',
+      funding: customSpotlight?.funding || 'Jointly funded with Tata Motors & Capital Goods Skill Council',
+      statLabel: customSpotlight?.statLabel || '400 High-Voltage Battery & Cobot Trainees Inducted This Month',
       actionBtn: 'View Center Blueprint',
     },
     hi: {
-      centerTitle: 'उन्नत दोहरा शिक्षुता प्रशिक्षण केंद्र',
-      location: 'जमशेदपुर / पुणे मेगा क्लस्टर',
-      funding: 'टाटा मोटर्स एवं पूंजीगत सामान कौशल परिषद के साथ संयुक्त रूप से वित्तपोषित',
-      statLabel: 'इस माह 400 हाई-वोल्टेज बैटरी एवं कोबोट प्रशिक्षु शामिल किए गए',
+      centerTitle: customSpotlight?.title || 'उन्नत दोहरा शिक्षुता प्रशिक्षण केंद्र',
+      location: customSpotlight?.location || 'जमशेदपुर / पुणे मेगा क्लस्टर',
+      funding: customSpotlight?.funding || 'टाटा मोटर्स एवं पूंजीगत सामान कौशल परिषद के साथ संयुक्त रूप से वित्तपोषित',
+      statLabel: customSpotlight?.statLabel || 'इस माह 400 हाई-वोल्टेज बैटरी एवं कोबोट प्रशिक्षु शामिल किए गए',
       actionBtn: 'केंद्र का ब्लूप्रिंट देखें',
     },
   };

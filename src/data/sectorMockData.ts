@@ -297,3 +297,766 @@ export const CURRICULUM_INSIGHTS: CurriculumInsight[] = [
     category: 'Industrial Automation',
   },
 ];
+
+export interface SectorIntelligenceData {
+  sectorId: string;
+  councilCode: string;
+  title: string;
+  titleHi: string;
+  pliBadge: string;
+  description: string;
+  descriptionHi: string;
+  kpis: {
+    healthScore: number;
+    seats: number;
+    demand: number;
+    gap: number;
+    healthDelta: string;
+    seatsDelta: string;
+    demandDelta: string;
+    gapTrend: string;
+  };
+  tradesCapacity: TradeCapacityData[];
+  heatmapRows: DistrictHeatmapRow[];
+  emergingRoles: EmergingRole[];
+  industrySpotlight: {
+    title: string;
+    location: string;
+    funding: string;
+    statLabel: string;
+  };
+  hiringPulse: {
+    multiplier: string;
+    pressureStatus: string;
+    ncsCount: string;
+    portalsCount: string;
+    napsCount: string;
+    timeToHire: string;
+  };
+  curriculumInsights: CurriculumInsight[];
+}
+
+/**
+ * Returns dynamic, authentic sectoral data tailored to the active Sector Skill Council,
+ * Geography, Forecasting Horizon, and Macro Scenario.
+ */
+export function getSectorIntelligenceData(
+  sectorId: string,
+  geoId = 'all',
+  horizon = '12m',
+  scenario = 'baseline'
+): SectorIntelligenceData {
+  const normSector = sectorId || 'mfg';
+
+  // Multipliers based on scenario and horizon
+  let scenarioMult = 1.0;
+  if (scenario === 'optimistic') scenarioMult = 1.22;
+  else if (scenario === 'conservative') scenarioMult = 0.88;
+
+  let horizonMult = 1.0;
+  if (horizon === '24m') horizonMult = 1.18;
+  else if (horizon === '36m') horizonMult = 1.35;
+  else if (horizon === 'n36') horizonMult = 0.92;
+
+  // Single State scale factor
+  const isSingleState = geoId !== 'all';
+  const geoScale = isSingleState ? (geoId === 'MH' ? 0.22 : geoId === 'GJ' ? 0.19 : geoId === 'TN' ? 0.18 : 0.14) : 1.0;
+
+  switch (normSector) {
+    case 'semi':
+      return {
+        sectorId: 'semi',
+        councilCode: 'ESSCI-SEMI-2026',
+        title: 'Electronics & Semiconductor (ESSCI)',
+        titleHi: 'इलेक्ट्रॉनिक्स एवं सेमीकंडक्टर कौशल परिषद',
+        pliBadge: 'INDIA SEMICONDUCTOR MISSION (ISM) • DHOLERA & MORIGAON FAB: ACCELERATED',
+        description: 'Comprehensive capacity ledger for cleanroom fabrication, OSAT/ATMP packaging, and sub-micron testing facilities.',
+        descriptionHi: 'क्लीनरूम फैब्रिकेशन, ओसैट/एटीएमपी पैकेजिंग और सब-माइक्रोन परीक्षण सुविधाओं के लिए समग्र क्षमता बहीखाता।',
+        kpis: {
+          healthScore: 68,
+          seats: Math.round(186400 * geoScale * scenarioMult),
+          demand: Math.round(278900 * geoScale * horizonMult),
+          gap: Math.round(92500 * geoScale),
+          healthDelta: '+8.2 pts QoQ',
+          seatsDelta: '+34.2% YoY (ISM Trajectory)',
+          demandDelta: '+41.8% (Fab & ATMP Expansion)',
+          gapTrend: 'Critical shortage in 8 Dholera/Sanand clusters',
+        },
+        tradesCapacity: [
+          {
+            id: 'semi-cleanroom',
+            trade: 'Cleanroom Class 100/1000 HVAC & Gas Tech',
+            tradeHi: 'क्लीनरूम क्लास 100/1000 एचवीएसी व गैस विशेषज्ञ',
+            nsqfLevel: 5,
+            currentCapacity: Math.round(14200 * geoScale),
+            projectedDemand: Math.round(38400 * geoScale),
+            netGap: -Math.round(24200 * geoScale),
+            gapPercent: -63,
+            leadTimeWeeks: 24,
+            isDeficit: true,
+          },
+          {
+            id: 'semi-litho',
+            trade: 'Photolithography & Stepper Equipment Operator',
+            tradeHi: 'फोटोलीथोग्राफी व स्टेपर उपकरण ऑपरेटर',
+            nsqfLevel: 6,
+            currentCapacity: Math.round(8900 * geoScale),
+            projectedDemand: Math.round(26400 * geoScale),
+            netGap: -Math.round(17500 * geoScale),
+            gapPercent: -66,
+            leadTimeWeeks: 28,
+            isDeficit: true,
+          },
+          {
+            id: 'semi-wafer',
+            trade: 'Silicon Ingot Slicing & CMP Wafer Polisher',
+            tradeHi: 'सिलिकॉन वेफर स्लाइसिंग एवं सीएमपी पॉलिशर',
+            nsqfLevel: 4,
+            currentCapacity: Math.round(18400 * geoScale),
+            projectedDemand: Math.round(39800 * geoScale),
+            netGap: -Math.round(21400 * geoScale),
+            gapPercent: -54,
+            leadTimeWeeks: 18,
+            isDeficit: true,
+          },
+          {
+            id: 'semi-vlsi',
+            trade: 'VLSI Physical Verification & DFT Testing Tech',
+            tradeHi: 'वीएलएसआई फिजिकल वेरिफिकेशन एवं डीएफटी टेस्टिंग',
+            nsqfLevel: 6,
+            currentCapacity: Math.round(22400 * geoScale),
+            projectedDemand: Math.round(44200 * geoScale),
+            netGap: -Math.round(21800 * geoScale),
+            gapPercent: -49,
+            leadTimeWeeks: 26,
+            isDeficit: true,
+          },
+          {
+            id: 'semi-pkg',
+            trade: 'Automated IC Wire-Bonding & Flip-Chip Specialist',
+            tradeHi: 'स्वचालित आईसी वायर-बॉन्डिंग व फ्लिप-चिप विशेषज्ञ',
+            nsqfLevel: 5,
+            currentCapacity: Math.round(31200 * geoScale),
+            projectedDemand: Math.round(52800 * geoScale),
+            netGap: -Math.round(21600 * geoScale),
+            gapPercent: -41,
+            leadTimeWeeks: 16,
+            isDeficit: true,
+          },
+          {
+            id: 'semi-metrology',
+            trade: 'Sub-Micron SEM & Optical Defect Metrologist',
+            tradeHi: 'सब-माइक्रोन एसईएम व ऑप्टिकल दोष मेट्रोलॉजिस्ट',
+            nsqfLevel: 5,
+            currentCapacity: Math.round(12800 * geoScale),
+            projectedDemand: Math.round(24100 * geoScale),
+            netGap: -Math.round(11300 * geoScale),
+            gapPercent: -47,
+            leadTimeWeeks: 20,
+            isDeficit: true,
+          },
+          {
+            id: 'semi-pcb-assembly',
+            trade: 'Advanced High-Density Interconnect (HDI) PCB Tech',
+            tradeHi: 'उच्च घनत्व इंटरकनेक्ट पीसीबी तकनीशियन',
+            nsqfLevel: 4,
+            currentCapacity: Math.round(58200 * geoScale),
+            projectedDemand: Math.round(52400 * geoScale),
+            netGap: Math.round(5800 * geoScale),
+            gapPercent: 11,
+            leadTimeWeeks: 10,
+            isDeficit: false,
+          },
+        ],
+        heatmapRows: DISTRICT_HEATMAP_DATA,
+        emergingRoles: [
+          {
+            id: 'er-semi-1',
+            title: 'Extreme Ultraviolet (EUV) Laser Source Technician',
+            titleHi: 'एक्सट्रीम अल्ट्रावॉयलेट (EUV) लेज़र तकनीशियन',
+            growthYoY: 240,
+            description: 'Maintenance of high-intensity CO2 laser amplification systems and droplet plasma generators for lithography.',
+            descriptionHi: 'लिथोग्राफी के लिए उच्च तीव्रता वाले CO2 लेजर सिस्टम का रखरखाव।',
+            primaryCluster: 'Dholera SIR (Gujarat) & Bengaluru Fab COE',
+            nsqfLevel: 6,
+            urgencyBadge: '+240% YoY',
+          },
+          {
+            id: 'er-semi-2',
+            title: 'Ultra-Pure Water (UPW) & Bulk Gas Fab Chemist',
+            titleHi: 'अल्ट्रा-प्योर वॉटर (UPW) एवं थोक गैस फैब केमिस्ट',
+            growthYoY: 175,
+            description: '18-megaohm resist-grade deionized water recirculation, sub-ppb particulate filtration, and silane handling.',
+            descriptionHi: '18-मेगाओम डी-आयोनाइज्ड जल चक्र एवं अल्ट्रा-प्योर गैस प्रबंधन।',
+            primaryCluster: 'Sanand & Dholera Industrial Corridor',
+            nsqfLevel: 5,
+            urgencyBadge: '+175% YoY',
+          },
+        ],
+        industrySpotlight: {
+          title: 'India Semiconductor Mission ATMP & Fab Dual Training Center',
+          location: 'Dholera Special Investment Region (SIR), Gujarat',
+          funding: 'Micron Technology, Tata Electronics & ESSCI Joint Initiative',
+          statLabel: '1,200 Cleanroom Certified Technicians Passing Out Q3 FY26',
+        },
+        hiringPulse: {
+          multiplier: '2.45x',
+          pressureStatus: 'Extreme Shortage • Rapid Fab Mobilization',
+          ncsCount: '142,600 active vacancies',
+          portalsCount: '210,400 active requisitions',
+          napsCount: '78,500 apprenticeships posted',
+          timeToHire: '62 Days',
+        },
+        curriculumInsights: [
+          {
+            id: 'ci-semi-1',
+            levelBadge: 'ISM Fast-Track Curricula',
+            priorityBadge: 'Priority 1 • Immediate',
+            priorityType: 'urgent',
+            title: 'Introduce Cleanroom Class 100 Gowning & Protocol in ITIs',
+            titleHi: 'आईटीआई में क्लीनरूम प्रोटोकॉल व गाउनिंग मॉड्यूल प्रारंभ करें',
+            description: 'Semiconductor manufacturers mandate 60-hour strict particulate control and electro-static discharge (ESD) standards across all CTS pass-outs.',
+            descriptionHi: 'सेमीकंडक्टर निर्माता सभी छात्रों के लिए पार्टिकुलेट नियंत्रण व ईएसडी मानकों को अनिवार्य करते हैं।',
+            actionText: 'Sanction 8 Fab-Linked Training Centers across Gujarat & Assam',
+            buttonLabel: 'Adopt Qualification',
+            category: 'Semiconductor Fab',
+          },
+          {
+            id: 'ci-semi-2',
+            levelBadge: 'NCVET Level 5 Revision',
+            priorityBadge: 'High Impact • 45 Days',
+            priorityType: 'high',
+            title: 'Advanced Wafer Dicing & Wire-Bonding QP Standardization',
+            titleHi: 'उन्नत वेफर डाइसिंग एवं वायर-बॉन्डिंग QP मानकीकरण',
+            description: 'Align curriculum with 12nm / 28nm packaging standards for Micron Sanand and Tata Electronics OSAT pipelines.',
+            descriptionHi: 'माइक्रोन साणंद और टाटा इलेक्ट्रॉनिक्स ओसैट पाइपलाइनों के लिए पाठ्यक्रम संरेखित करें।',
+            actionText: 'Update Qualification File with ESSCI Board',
+            buttonLabel: 'Review Standard',
+            category: 'Packaging & Assembly',
+          },
+        ],
+      };
+
+    case 'auto':
+      return {
+        sectorId: 'auto',
+        councilCode: 'ASDC-AUTO-2026',
+        title: 'Automotive & Clean Mobility (ASDC)',
+        titleHi: 'ऑटोमोटिव कौशल विकास परिषद (ASDC)',
+        pliBadge: 'PLI ADVANCED AUTOMOTIVE TECH & ACC BATTERY: SCALING',
+        description: 'Workforce ledger for electric powertrain assembly, battery cell manufacturing, lightweight die tooling, and ADAS diagnostics.',
+        descriptionHi: 'इलेक्ट्रिक पावरट्रेन, बैटरी सेल विनिर्माण और एडीएएस डायग्नोस्टिक्स कार्यबल बहीखाता।',
+        kpis: {
+          healthScore: 74,
+          seats: Math.round(540000 * geoScale * scenarioMult),
+          demand: Math.round(682000 * geoScale * horizonMult),
+          gap: Math.round(142000 * geoScale),
+          healthDelta: '-2.1 pts QoQ',
+          seatsDelta: '+14.6% YoY (EV Re-tooling)',
+          demandDelta: '+22.4% (OEM Gigafactory Ramp)',
+          gapTrend: 'Severe deficit in EV powertrain & high-voltage battery lines',
+        },
+        tradesCapacity: [
+          {
+            id: 'auto-battery',
+            trade: 'EV Battery Pack & BMS Integration Specialist',
+            tradeHi: 'ईवी बैटरी पैक एवं बीएमएस एकीकरण विशेषज्ञ',
+            nsqfLevel: 5,
+            currentCapacity: Math.round(34000 * geoScale),
+            projectedDemand: Math.round(88000 * geoScale),
+            netGap: -Math.round(54000 * geoScale),
+            gapPercent: -61,
+            leadTimeWeeks: 16,
+            isDeficit: true,
+          },
+          {
+            id: 'auto-motor',
+            trade: 'Permanent Magnet Synchronous Motor (PMSM) Winder',
+            tradeHi: 'सिंक्रोनस मोटर (PMSM) वाइंडिंग तकनीशियन',
+            nsqfLevel: 4,
+            currentCapacity: Math.round(28000 * geoScale),
+            projectedDemand: Math.round(56000 * geoScale),
+            netGap: -Math.round(28000 * geoScale),
+            gapPercent: -50,
+            leadTimeWeeks: 14,
+            isDeficit: true,
+          },
+          {
+            id: 'auto-hv-wiring',
+            trade: 'High-Voltage (800V DC) Automotive Harness Tech',
+            tradeHi: 'हाई-वोल्टेज (800V DC) ऑटोमोटिव हार्नेस तकनीशियन',
+            nsqfLevel: 4,
+            currentCapacity: Math.round(48000 * geoScale),
+            projectedDemand: Math.round(82000 * geoScale),
+            netGap: -Math.round(34000 * geoScale),
+            gapPercent: -41,
+            leadTimeWeeks: 12,
+            isDeficit: true,
+          },
+          {
+            id: 'auto-cnc-auto',
+            trade: 'Lightweight Aluminum Casting & 5-Axis CNC Tech',
+            tradeHi: 'हल्के एल्यूमीनियम कास्टिंग व 5-एक्सिस सीएनसी',
+            nsqfLevel: 5,
+            currentCapacity: Math.round(62000 * geoScale),
+            projectedDemand: Math.round(98000 * geoScale),
+            netGap: -Math.round(36000 * geoScale),
+            gapPercent: -37,
+            leadTimeWeeks: 18,
+            isDeficit: true,
+          },
+          {
+            id: 'auto-welder',
+            trade: 'Robotic Laser & Resistance Spot Welder',
+            tradeHi: 'रोबोटिक लेज़र एवं स्पॉट वेल्डर',
+            nsqfLevel: 4,
+            currentCapacity: Math.round(112000 * geoScale),
+            projectedDemand: Math.round(118000 * geoScale),
+            netGap: -Math.round(6000 * geoScale),
+            gapPercent: -5,
+            leadTimeWeeks: 10,
+            isDeficit: false,
+          },
+        ],
+        heatmapRows: DISTRICT_HEATMAP_DATA,
+        emergingRoles: [
+          {
+            id: 'er-auto-1',
+            title: 'EV Immersion Cooling & Thermal Loop Calibrator',
+            titleHi: 'ईवी इमर्शन कूलिंग एवं थर्मल लूप कैलिब्रेटर',
+            growthYoY: 188,
+            description: 'Direct-contact dielectric fluid flow balancing, heat exchanger telemetry, and cryogenic AC diagnostics.',
+            descriptionHi: 'डायलेक्ट्रिक फ्लूइड फ्लो संतुलन एवं हीट एक्सचेंजर टेलीमेट्री।',
+            primaryCluster: 'Pune (Chakan) & Chennai (Sriperumbudur)',
+            nsqfLevel: 5,
+            urgencyBadge: '+188% YoY',
+          },
+        ],
+        industrySpotlight: {
+          title: 'Automotive Clean Mobility National Skill COE',
+          location: 'Chakan-Talegaon Industrial Belt, Pune',
+          funding: 'Tata Motors, Bajaj Auto, ASDC & Maharashtra State Skill Mission',
+          statLabel: '3,800 EV Certified Apprentices Inducted Across Tier-1 Suppliers',
+        },
+        hiringPulse: {
+          multiplier: '1.92x',
+          pressureStatus: 'High Demand • EV Powertrain Transition',
+          ncsCount: '284,500 active vacancies',
+          portalsCount: '412,000 active requisitions',
+          napsCount: '154,000 apprenticeships posted',
+          timeToHire: '42 Days',
+        },
+        curriculumInsights: CURRICULUM_INSIGHTS,
+      };
+
+    case 'green':
+      return {
+        sectorId: 'green',
+        councilCode: 'SCGJ-GREEN-2026',
+        title: 'Green Hydrogen & Renewables (SCGJ)',
+        titleHi: 'हरित कौशल परिषद (SCGJ)',
+        pliBadge: 'NATIONAL GREEN HYDROGEN MISSION • SIGHT PROGRAMME: ACTIVE',
+        description: 'Specialized workforce telemetry for solar gigawatt parks, alkaline/PEM electrolyzers, green ammonia terminals, and wind farms.',
+        descriptionHi: 'सोलर पार्क, इलेक्ट्रोलाइज़र, ग्रीन अमोनिया टर्मिनल और पवन ऊर्जा के लिए कार्यबल टेलीमेट्री।',
+        kpis: {
+          healthScore: 71,
+          seats: Math.round(212000 * geoScale * scenarioMult),
+          demand: Math.round(318000 * geoScale * horizonMult),
+          gap: Math.round(106000 * geoScale),
+          healthDelta: '+12.4 pts QoQ',
+          seatsDelta: '+28.4% YoY (Solar & H2 Target)',
+          demandDelta: '+36.2% (Gigawatt Installations)',
+          gapTrend: 'Acute shortage in electrolyzer assembly & high-pressure H2 piping',
+        },
+        tradesCapacity: [
+          {
+            id: 'green-electrolyzer',
+            trade: 'PEM & Alkaline Electrolyzer Stack Assembler',
+            tradeHi: 'पीईएम एवं क्षारीय इलेक्ट्रोलाइज़र स्टैक असेंबलर',
+            nsqfLevel: 5,
+            currentCapacity: Math.round(12400 * geoScale),
+            projectedDemand: Math.round(48200 * geoScale),
+            netGap: -Math.round(35800 * geoScale),
+            gapPercent: -74,
+            leadTimeWeeks: 22,
+            isDeficit: true,
+          },
+          {
+            id: 'green-solar-scada',
+            trade: 'Utility-Scale Solar PV Inverter & SCADA Tech',
+            tradeHi: 'सोलर पीवी इन्वर्टर एवं स्काडा तकनीशियन',
+            nsqfLevel: 4,
+            currentCapacity: Math.round(54000 * geoScale),
+            projectedDemand: Math.round(89000 * geoScale),
+            netGap: -Math.round(35000 * geoScale),
+            gapPercent: -39,
+            leadTimeWeeks: 12,
+            isDeficit: true,
+          },
+          {
+            id: 'green-h2-piping',
+            trade: 'High-Pressure (700 Bar) H2 Cryogenic Piping Tech',
+            tradeHi: 'उच्च दबाव (700 बार) H2 क्रायोजेनिक पाइपिंग तकनीशियन',
+            nsqfLevel: 5,
+            currentCapacity: Math.round(9800 * geoScale),
+            projectedDemand: Math.round(32400 * geoScale),
+            netGap: -Math.round(22600 * geoScale),
+            gapPercent: -70,
+            leadTimeWeeks: 20,
+            isDeficit: true,
+          },
+          {
+            id: 'green-wind',
+            trade: 'Wind Turbine Nacelle & Blade Maintenance Tech',
+            tradeHi: 'पवन टरबाइन नैकेल एवं ब्लेड रखरखाव तकनीशियन',
+            nsqfLevel: 4,
+            currentCapacity: Math.round(24000 * geoScale),
+            projectedDemand: Math.round(41000 * geoScale),
+            netGap: -Math.round(17000 * geoScale),
+            gapPercent: -41,
+            leadTimeWeeks: 14,
+            isDeficit: true,
+          },
+        ],
+        heatmapRows: DISTRICT_HEATMAP_DATA,
+        emergingRoles: [
+          {
+            id: 'er-green-1',
+            title: 'Green Hydrogen Gas Dispatcher & Embrittlement Tester',
+            titleHi: 'ग्रीन हाइड्रोजन गैस प्रेषक एवं धातु भंगुरता परीक्षक',
+            growthYoY: 260,
+            description: 'Monitoring high-pressure pipeline integrity, ultrasonic leak detection, and catalytic compressor stations.',
+            descriptionHi: 'उच्च दबाव पाइपलाइन अखंडता एवं अल्ट्रासोनिक रिसाव का परीक्षण।',
+            primaryCluster: 'Kutch / Jamnagar (GJ) & Jodhpur (RJ)',
+            nsqfLevel: 5,
+            urgencyBadge: '+260% YoY',
+          },
+        ],
+        industrySpotlight: {
+          title: 'National Green Hydrogen Mission Coastal COE',
+          location: 'Jamnagar & Kutch Energy Corridors, Gujarat',
+          funding: 'Reliance New Energy, Adani Green & Skill Council for Green Jobs',
+          statLabel: '2,400 Certified Electrolyzer Technicians Graduating in 2026',
+        },
+        hiringPulse: {
+          multiplier: '2.15x',
+          pressureStatus: 'Very High • Renewable Megapark Rollout',
+          ncsCount: '198,000 active vacancies',
+          portalsCount: '248,000 active requisitions',
+          napsCount: '62,000 apprenticeships posted',
+          timeToHire: '54 Days',
+        },
+        curriculumInsights: CURRICULUM_INSIGHTS,
+      };
+
+    case 'health':
+      return {
+        sectorId: 'health',
+        councilCode: 'HSSC-HEALTH-2026',
+        title: 'Healthcare & Allied Medical (HSSC)',
+        titleHi: 'स्वास्थ्य सेवा कौशल परिषद (HSSC)',
+        pliBadge: 'AYUSHMAN BHARAT • MEDICAL DEVICES PLI: DEPLOYING',
+        description: 'Tracking hospital allied health workers, biomedical equipment maintenance engineers, radiology techs, and dialysis specialists.',
+        descriptionHi: 'अस्पताल संबद्ध स्वास्थ्य कार्यकर्ता, बायोमेडिकल उपकरण रखरखाव एवं डायलिसिस विशेषज्ञ।',
+        kpis: {
+          healthScore: 82,
+          seats: Math.round(390000 * geoScale * scenarioMult),
+          demand: Math.round(495000 * geoScale * horizonMult),
+          gap: Math.round(105000 * geoScale),
+          healthDelta: '+4.5 pts QoQ',
+          seatsDelta: '+18.2% YoY',
+          demandDelta: '+21.0% (Tier-2/3 Hospital Additions)',
+          gapTrend: 'Acute shortage in emergency medicine & dialysis technicians',
+        },
+        tradesCapacity: [
+          {
+            id: 'health-dialysis',
+            trade: 'Dialysis & Renal Care Biomedical Technician',
+            tradeHi: 'डायलिसिस एवं रीनल केयर बायोमेडिकल तकनीशियन',
+            nsqfLevel: 5,
+            currentCapacity: Math.round(24000 * geoScale),
+            projectedDemand: Math.round(58000 * geoScale),
+            netGap: -Math.round(34000 * geoScale),
+            gapPercent: -58,
+            leadTimeWeeks: 20,
+            isDeficit: true,
+          },
+          {
+            id: 'health-ot-anaesthesia',
+            trade: 'Operation Theatre & Anaesthesia Assistant',
+            tradeHi: 'ऑपरेशन थिएटर एवं एनेस्थीसिया सहायक',
+            nsqfLevel: 4,
+            currentCapacity: Math.round(38000 * geoScale),
+            projectedDemand: Math.round(72000 * geoScale),
+            netGap: -Math.round(34000 * geoScale),
+            gapPercent: -47,
+            leadTimeWeeks: 16,
+            isDeficit: true,
+          },
+          {
+            id: 'health-radiology',
+            trade: 'CT Scan & MRI Medical Imaging Technician',
+            tradeHi: 'सीटी स्कैन एवं एमआरआई मेडिकल इमेजिंग तकनीशियन',
+            nsqfLevel: 5,
+            currentCapacity: Math.round(31000 * geoScale),
+            projectedDemand: Math.round(52000 * geoScale),
+            netGap: -Math.round(21000 * geoScale),
+            gapPercent: -40,
+            leadTimeWeeks: 18,
+            isDeficit: true,
+          },
+        ],
+        heatmapRows: DISTRICT_HEATMAP_DATA,
+        emergingRoles: [
+          {
+            id: 'er-health-1',
+            title: 'Robotic Surgical System Calibration Tech',
+            titleHi: 'रोबोटिक सर्जिकल सिस्टम कैलिब्रेशन तकनीशियन',
+            growthYoY: 135,
+            description: 'Laser endoscope alignment, articulated arm haptic calibration, and sterile barrier diagnostics.',
+            descriptionHi: 'रोबोटिक सर्जिकल उपकरणों का संरेखण एवं स्टरलाइज्ड कैलिब्रेशन।',
+            primaryCluster: 'Bengaluru, Delhi-NCR & Mumbai Hubs',
+            nsqfLevel: 6,
+            urgencyBadge: '+135% YoY',
+          },
+        ],
+        industrySpotlight: {
+          title: 'Allied Healthcare National Institute of Medical Devices',
+          location: 'MedTech Zone, Visakhapatnam & Hyderabad Hub',
+          funding: 'AMTZ & Healthcare Sector Skill Council Joint Center',
+          statLabel: '5,000 Certified Critical Care Techs Deployed Across District Hospitals',
+        },
+        hiringPulse: {
+          multiplier: '1.75x',
+          pressureStatus: 'High • Public Health Infrastructure Expansion',
+          ncsCount: '310,000 active vacancies',
+          portalsCount: '385,000 active requisitions',
+          napsCount: '92,000 apprenticeships posted',
+          timeToHire: '38 Days',
+        },
+        curriculumInsights: CURRICULUM_INSIGHTS,
+      };
+
+    case 'it':
+      return {
+        sectorId: 'it',
+        councilCode: 'NASSCOM-IT-2026',
+        title: 'IT-ITeS & Digital Services (NASSCOM)',
+        titleHi: 'आईटी-आईटीईएस कौशल परिषद (NASSCOM)',
+        pliBadge: 'DIGITAL INDIA • CYBERSECURITY & AI SKILLS: ON TRACK',
+        description: 'Tracking enterprise software, cloud infrastructure, AI prompt engineering, cybersecurity SOC operations, and devops.',
+        descriptionHi: 'क्लाउड अवसंरचना, एआई प्रॉम्प्ट इंजीनियरिंग, साइबर सुरक्षा एसओसी और देवऑप्स।',
+        kpis: {
+          healthScore: 84,
+          seats: Math.round(680000 * geoScale * scenarioMult),
+          demand: Math.round(740000 * geoScale * horizonMult),
+          gap: Math.round(60000 * geoScale),
+          healthDelta: '+1.8 pts QoQ',
+          seatsDelta: '+9.4% YoY',
+          demandDelta: '+8.2% (Generative AI Transformation)',
+          gapTrend: 'Deficit in Cloud & Cyber; Slight oversupply in legacy coding',
+        },
+        tradesCapacity: [
+          {
+            id: 'it-cyber',
+            trade: 'Cybersecurity SOC Analyst & Threat Responder',
+            tradeHi: 'साइबर सुरक्षा एसओसी विश्लेषक',
+            nsqfLevel: 6,
+            currentCapacity: Math.round(42000 * geoScale),
+            projectedDemand: Math.round(84000 * geoScale),
+            netGap: -Math.round(42000 * geoScale),
+            gapPercent: -50,
+            leadTimeWeeks: 22,
+            isDeficit: true,
+          },
+          {
+            id: 'it-cloud-devops',
+            trade: 'Cloud Architect & Kubernetes DevOps Lead',
+            tradeHi: 'क्लाउड आर्किटेक्ट एवं कुबेरनेट्स देवऑप्स लीड',
+            nsqfLevel: 6,
+            currentCapacity: Math.round(58000 * geoScale),
+            projectedDemand: Math.round(98000 * geoScale),
+            netGap: -Math.round(40000 * geoScale),
+            gapPercent: -41,
+            leadTimeWeeks: 20,
+            isDeficit: true,
+          },
+          {
+            id: 'it-legacy-coding',
+            trade: 'Basic Front-End Web Designer (HTML/CSS)',
+            tradeHi: 'बेसिक वेब डिजाइनर (एचटीएमएल/सीएसएस)',
+            nsqfLevel: 4,
+            currentCapacity: Math.round(184000 * geoScale),
+            projectedDemand: Math.round(145000 * geoScale),
+            netGap: Math.round(39000 * geoScale),
+            gapPercent: 26,
+            leadTimeWeeks: 8,
+            isDeficit: false,
+          },
+        ],
+        heatmapRows: DISTRICT_HEATMAP_DATA,
+        emergingRoles: [
+          {
+            id: 'er-it-1',
+            title: 'Enterprise LLM Fine-Tuning & Data Annotation Lead',
+            titleHi: 'एलएलएम फाइन-ट्यूनिंग एवं डेटा एनोटेशन लीड',
+            growthYoY: 285,
+            description: 'Model alignment, RLHF evaluation, and prompt injection defensive hardening for enterprise workflows.',
+            descriptionHi: 'मॉडल संरेखण, आरएलएचएफ मूल्यांकन एवं प्रॉम्प्ट इंजेक्शन सुरक्षा।',
+            primaryCluster: 'Bengaluru, Hyderabad & Pune IT Corridors',
+            nsqfLevel: 6,
+            urgencyBadge: '+285% YoY',
+          },
+        ],
+        industrySpotlight: {
+          title: 'National Centre for AI & Cybersecurity Excellence',
+          location: 'Electronic City, Bengaluru & Cyberabad, Hyderabad',
+          funding: 'NASSCOM, MeitY & MSDE Multi-Stakeholder Alliance',
+          statLabel: '14,000 Certified Cloud & AI Specialists Deployed This Year',
+        },
+        hiringPulse: {
+          multiplier: '1.45x',
+          pressureStatus: 'Moderate • Strong Demand in AI/Cloud Niches',
+          ncsCount: '420,000 active vacancies',
+          portalsCount: '650,000 active requisitions',
+          napsCount: '110,000 apprenticeships posted',
+          timeToHire: '32 Days',
+        },
+        curriculumInsights: CURRICULUM_INSIGHTS,
+      };
+
+    case 'logistics':
+      return {
+        sectorId: 'logistics',
+        councilCode: 'LSC-LOGISTICS-2026',
+        title: 'Logistics & Supply Chain (LSC)',
+        titleHi: 'लॉजिस्टिक्स कौशल परिषद (LSC)',
+        pliBadge: 'NATIONAL LOGISTICS POLICY (NLP) • DEDICATED FREIGHT CORRIDOR: EXPANDING',
+        description: 'Tracking multi-modal warehousing, automated sorting systems, cold-chain temperature monitoring, and commercial EV freight operators.',
+        descriptionHi: 'मल्टी-मॉडल वेयरहाउसिंग, स्वचालित सॉर्टिंग, कोल्ड चेन और वाणिज्यिक ईवी फ्रेट।',
+        kpis: {
+          healthScore: 79,
+          seats: Math.round(340000 * geoScale * scenarioMult),
+          demand: Math.round(448000 * geoScale * horizonMult),
+          gap: Math.round(108000 * geoScale),
+          healthDelta: '+3.1 pts QoQ',
+          seatsDelta: '+12.8% YoY',
+          demandDelta: '+19.5% (E-Commerce & Port Logistics)',
+          gapTrend: 'Deficit in automated warehouse & cold-chain specialists',
+        },
+        tradesCapacity: [
+          {
+            id: 'log-asrs',
+            trade: 'Automated AS/RS Warehouse System Tech',
+            tradeHi: 'स्वचालित एएस/आरएस वेयरहाउस सिस्टम तकनीशियन',
+            nsqfLevel: 5,
+            currentCapacity: Math.round(18000 * geoScale),
+            projectedDemand: Math.round(46000 * geoScale),
+            netGap: -Math.round(28000 * geoScale),
+            gapPercent: -61,
+            leadTimeWeeks: 16,
+            isDeficit: true,
+          },
+          {
+            id: 'log-cold-chain',
+            trade: 'Pharma & Agri Cold-Chain Telemetry Specialist',
+            tradeHi: 'कोल्ड-चेन टेलीमेट्री विशेषज्ञ',
+            nsqfLevel: 4,
+            currentCapacity: Math.round(22000 * geoScale),
+            projectedDemand: Math.round(48000 * geoScale),
+            netGap: -Math.round(26000 * geoScale),
+            gapPercent: -54,
+            leadTimeWeeks: 14,
+            isDeficit: true,
+          },
+          {
+            id: 'log-manual-loader',
+            trade: 'Traditional Manual Dock Loader / Forklift',
+            tradeHi: 'मैनुअल डॉक लोडर / पारंपरिक फोर्कलिफ्ट',
+            nsqfLevel: 3,
+            currentCapacity: Math.round(124000 * geoScale),
+            projectedDemand: Math.round(110000 * geoScale),
+            netGap: Math.round(14000 * geoScale),
+            gapPercent: 12,
+            leadTimeWeeks: 6,
+            isDeficit: false,
+          },
+        ],
+        heatmapRows: DISTRICT_HEATMAP_DATA,
+        emergingRoles: [
+          {
+            id: 'er-log-1',
+            title: 'Drone Port & BVLOS Air Corridor Dispatcher',
+            titleHi: 'ड्रोन पोर्ट एवं बीवीएलओएस एयर कॉरिडोर डिस्पैचर',
+            growthYoY: 195,
+            description: 'Managing remote air freight nodes, automated charging docks, and payload balancing for medical deliveries.',
+            descriptionHi: 'रिमोट एयर फ्रेट नोड्स एवं स्वचालित चार्जिंग डॉक्स का प्रबंधन।',
+            primaryCluster: 'Bhiwandi (MH), Luhari (HR) & Sriperumbudur (TN)',
+            nsqfLevel: 5,
+            urgencyBadge: '+195% YoY',
+          },
+        ],
+        industrySpotlight: {
+          title: 'National Logistics Multi-Modal Skill Hub',
+          location: 'Bhiwandi Logistics Hub, Maharashtra & Western DFC Node',
+          funding: 'Logistics Sector Skill Council & Inland Waterways Authority',
+          statLabel: '4,200 High-Tech Cold Chain Specialists Deployed in Q2 FY26',
+        },
+        hiringPulse: {
+          multiplier: '1.68x',
+          pressureStatus: 'High • Warehouse Automation Scaling',
+          ncsCount: '265,000 active vacancies',
+          portalsCount: '340,000 active requisitions',
+          napsCount: '88,000 apprenticeships posted',
+          timeToHire: '28 Days',
+        },
+        curriculumInsights: CURRICULUM_INSIGHTS,
+      };
+
+    case 'all':
+    case 'mfg':
+    default:
+      return {
+        sectorId: normSector,
+        councilCode: 'CGSC-MFG-2026',
+        title: normSector === 'all' ? 'All 38 National Sectors (Aggregate)' : 'Manufacturing & Capital Goods (CGSC)',
+        titleHi: normSector === 'all' ? 'सभी 38 राष्ट्रीय क्षेत्रक (सकल)' : 'विनिर्माण एवं पूंजीगत वस्तु क्षेत्र (CGSC)',
+        pliBadge: 'PLI CAPITAL GOODS • AUTO • DEFENCE CORRIDORS: ON-TRACK',
+        description: 'National overview of capital goods, heavy precision machining, casting, fabrication, and industrial automation.',
+        descriptionHi: 'पूंजीगत सामान, भारी सटीक मशीनिंग, कास्टिंग और औद्योगिक स्वचालन का राष्ट्रीय अवलोकन।',
+        kpis: {
+          healthScore: 78,
+          seats: Math.round(842500 * geoScale * scenarioMult),
+          demand: Math.round(984200 * geoScale * horizonMult),
+          gap: Math.round(141700 * geoScale),
+          healthDelta: '-3.4 pts YoY',
+          seatsDelta: '+7.4% from baseline',
+          demandDelta: '+18.1% (YoY) - PLI & Capex Driven',
+          gapTrend: 'Critical deficit in 14 Priority Clusters',
+        },
+        tradesCapacity: SECTOR_TRADES_CAPACITY.map((t) => ({
+          ...t,
+          currentCapacity: Math.round(t.currentCapacity * geoScale),
+          projectedDemand: Math.round(t.projectedDemand * geoScale * horizonMult),
+          netGap: Math.round((t.currentCapacity - t.projectedDemand * horizonMult) * geoScale),
+        })),
+        heatmapRows: DISTRICT_HEATMAP_DATA,
+        emergingRoles: EMERGING_ROLES,
+        industrySpotlight: {
+          title: 'Advanced Dual-Apprenticeship Training Center',
+          location: 'Jamshedpur / Pune Mega Clusters',
+          funding: 'Jointly funded with Tata Motors & Capital Goods Skill Council',
+          statLabel: '400 High-Voltage Battery & Cobot Trainees Inducted This Month',
+        },
+        hiringPulse: {
+          multiplier: '1.82x',
+          pressureStatus: 'Industry Hiring Pressure: High',
+          ncsCount: '357,400 active',
+          portalsCount: '481,200 active',
+          napsCount: '184,800 posted',
+          timeToHire: '48 Days',
+        },
+        curriculumInsights: CURRICULUM_INSIGHTS,
+      };
+  }
+}

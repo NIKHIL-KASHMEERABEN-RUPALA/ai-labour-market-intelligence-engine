@@ -18,15 +18,22 @@ import { TrendingUp, AlertTriangle, Target, Layers } from 'lucide-react';
 
 interface DemandSupplyGapChartProps {
   language: Language;
+  forecastData?: DistrictForecastPoint[];
+  subtitle?: string;
 }
 
-export const DemandSupplyGapChart: React.FC<DemandSupplyGapChartProps> = ({ language }) => {
+export const DemandSupplyGapChart: React.FC<DemandSupplyGapChartProps> = ({
+  language,
+  forecastData: customForecastData,
+  subtitle: customSubtitle,
+}) => {
+  const chartData = customForecastData || PUNE_FORECAST_DATA;
   const [metricMode, setMetricMode] = useState<'capacityVsDemand' | 'netGap'>('capacityVsDemand');
 
   const dict = {
     en: {
       title: '6 to 18-Month Demand-Supply Gap Forecast',
-      subtitle: 'Synthesized econometric model: Chakan auto-cluster, Hinjawadi hardware hubs, and Baramati agro lines.',
+      subtitle: customSubtitle || 'Synthesized econometric model: Chakan auto-cluster, Hinjawadi hardware hubs, and Baramati agro lines.',
       demandLegend: 'Projected Industry Demand',
       supplyLegend: 'Sanctioned Supply Capacity',
       gapLegend: 'Deficit Shortfall Zone',
@@ -184,7 +191,7 @@ export const DemandSupplyGapChart: React.FC<DemandSupplyGapChartProps> = ({ lang
       {/* Chart container */}
       <div className="h-[260px] w-full pt-2">
         <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={PUNE_FORECAST_DATA} margin={{ top: 15, right: 20, left: 10, bottom: 0 }}>
+          <ComposedChart data={chartData} margin={{ top: 15, right: 20, left: 10, bottom: 0 }}>
             <defs>
               <linearGradient id="puneSupplyAreaGrad" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.35} />

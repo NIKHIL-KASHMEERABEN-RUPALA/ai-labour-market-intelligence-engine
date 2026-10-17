@@ -8,6 +8,13 @@ interface DistrictHeaderSubBarProps {
   onOpenActionBrief: () => void;
   onProposeTargetRevision: () => void;
   onFlagSscReview: () => void;
+  title?: string;
+  titleHi?: string;
+  breadcrumbState?: string;
+  breadcrumbCurrent?: string;
+  priorityBadge?: string;
+  subtitle?: string;
+  subtitleHi?: string;
 }
 
 export const DistrictHeaderSubBar: React.FC<DistrictHeaderSubBarProps> = ({
@@ -16,28 +23,35 @@ export const DistrictHeaderSubBar: React.FC<DistrictHeaderSubBarProps> = ({
   onOpenActionBrief,
   onProposeTargetRevision,
   onFlagSscReview,
+  title: customTitle,
+  titleHi: customTitleHi,
+  breadcrumbState: customBreadcrumbState,
+  breadcrumbCurrent: customBreadcrumbCurrent,
+  priorityBadge: customPriorityBadge,
+  subtitle: customSubtitle,
+  subtitleHi: customSubtitleHi,
 }) => {
   const dict = {
     en: {
       breadcrumbRoot: 'National Overview',
-      breadcrumbState: 'Maharashtra (State Code: 27)',
-      breadcrumbCurrent: 'Pune Industrial Corridor',
-      priorityBadge: 'STATE PRIORITY CLUSTER • RANK: #01 • District Code: 27-522',
-      title: 'District War-Room: Pune',
-      titleHi: 'जिला वार-रूम: पुणे, महाराष्ट्र',
-      subtitle: 'Automotive, IT-Hardware & Agro-Processing Industrial Nexus • Maharashtra',
+      breadcrumbState: customBreadcrumbState || 'Maharashtra (State Code: 27)',
+      breadcrumbCurrent: customBreadcrumbCurrent || 'Pune Industrial Corridor',
+      priorityBadge: customPriorityBadge || 'STATE PRIORITY CLUSTER • RANK: #01 • District Code: 27-522',
+      title: customTitle || 'District War-Room: Pune',
+      titleHi: customTitleHi || 'जिला वार-रूम: पुणे, महाराष्ट्र',
+      subtitle: customSubtitle || 'Automotive, IT-Hardware & Agro-Processing Industrial Nexus • Maharashtra',
       proposeRevisionBtn: 'Propose Target Revision',
       flagSscBtn: 'Flag for SSC Review',
       actionBriefBtn: 'District Brief (PDF)',
     },
     hi: {
       breadcrumbRoot: 'राष्ट्रीय अवलोकन',
-      breadcrumbState: 'महाराष्ट्र (राज्य कोड: 27)',
-      breadcrumbCurrent: 'पुणे औद्योगिक गलियारा',
-      priorityBadge: 'राज्य प्राथमिकता क्लस्टर • रैंक: #01 • जिला कोड: 27-522',
-      title: 'जिला वार-रूम: पुणे',
-      titleHi: 'District War-Room: Pune',
-      subtitle: 'ऑटोमोटिव, आईटी-हार्डवेयर एवं कृषि प्रसंस्करण औद्योगिक हब • महाराष्ट्र',
+      breadcrumbState: customBreadcrumbState || 'महाराष्ट्र (राज्य कोड: 27)',
+      breadcrumbCurrent: customBreadcrumbCurrent || 'पुणे औद्योगिक गलियारा',
+      priorityBadge: customPriorityBadge || 'राज्य प्राथमिकता क्लस्टर • रैंक: #01 • जिला कोड: 27-522',
+      title: customTitleHi || customTitle || 'जिला वार-रूम: पुणे',
+      titleHi: customTitle || 'District War-Room: Pune',
+      subtitle: customSubtitleHi || customSubtitle || 'ऑटोमोटिव, आईटी-हार्डवेयर एवं कृषि प्रसंस्करण औद्योगिक हब • महाराष्ट्र',
       proposeRevisionBtn: 'लक्ष्य संशोधन प्रस्ताव',
       flagSscBtn: 'एसएससी समीक्षा हेतु फ्लैग करें',
       actionBriefBtn: 'जिला संक्षेपिका (पीडीएफ)',

@@ -7,20 +7,27 @@ import { MapPin, Building2, CheckCircle2, AlertTriangle, Layers, Navigation } fr
 interface PuneMapComponentProps {
   language: Language;
   onSelectCenter?: (center: TrainingCenterMarker) => void;
+  centers?: TrainingCenterMarker[];
+  districtBadge?: string;
+  districtTitle?: string;
 }
 
 export const PuneMapComponent: React.FC<PuneMapComponentProps> = ({
   language,
   onSelectCenter,
+  centers: customCenters,
+  districtBadge,
+  districtTitle,
 }) => {
-  const [selectedCenter, setSelectedCenter] = useState<TrainingCenterMarker | null>(PUNE_CENTERS[0]);
+  const centersList = customCenters && customCenters.length > 0 ? customCenters : PUNE_CENTERS;
+  const [selectedCenter, setSelectedCenter] = useState<TrainingCenterMarker | null>(centersList[0]);
   const [hoveredCenter, setHoveredCenter] = useState<TrainingCenterMarker | null>(null);
 
-  const activeCenter = hoveredCenter || selectedCenter || PUNE_CENTERS[0];
+  const activeCenter = hoveredCenter || selectedCenter || centersList[0];
 
   const dict = {
     en: {
-      title: 'Geographic Infrastructure Map',
+      title: districtTitle ? `${districtTitle} Infrastructure Map` : 'Geographic Infrastructure Map',
       subtitle: 'Cluster PMKK, Govt ITI, and Private Centers overlaid with demand hotspots.',
       seatsLabel: 'Sanctioned Capacity',
       tradesLabel: 'Trades Offered',
@@ -32,7 +39,7 @@ export const PuneMapComponent: React.FC<PuneMapComponentProps> = ({
       clickHint: 'Click center marker to inspect institutional capacity',
     },
     hi: {
-      title: 'भौगोलिक अवसंरचना मानचित्र',
+      title: districtTitle ? `${districtTitle} अवसंरचना मानचित्र` : 'भौगोलिक अवसंरचना मानचित्र',
       subtitle: 'मांग हॉटस्पॉट के साथ क्लस्टर पीएमकेके, सरकारी आईटीआई और निजी केंद्र।',
       seatsLabel: 'स्वीकृत क्षमता',
       tradesLabel: 'उपलब्ध व्यवसाय',
@@ -58,7 +65,7 @@ export const PuneMapComponent: React.FC<PuneMapComponentProps> = ({
             </h2>
           </div>
           <span className="text-[10px] font-mono font-bold bg-blue-50 text-blue-800 px-2 py-0.5 rounded border border-blue-200">
-            Pune Dist (27-522)
+            {districtBadge || 'Cluster Zone (Active)'}
           </span>
         </div>
         <p className="text-[11px] text-slate-500 mt-1">
@@ -133,7 +140,7 @@ export const PuneMapComponent: React.FC<PuneMapComponentProps> = ({
             </text>
 
             {/* Render Center Markers */}
-            {PUNE_CENTERS.map((center) => {
+            {centersList.map((center) => {
               const isSelected = activeCenter?.id === center.id;
               const markerColor =
                 center.status === 'Critical Deficit'

@@ -6,48 +6,62 @@ import { formatIndianNumber } from '../../utils/formatters';
 interface SectorKpiRowProps {
   language: Language;
   onCardClick?: (cardId: string) => void;
+  kpis?: {
+    healthScore: number;
+    seats: number;
+    demand: number;
+    gap: number;
+    healthDelta: string;
+    seatsDelta: string;
+    demandDelta: string;
+    gapTrend: string;
+  };
 }
 
-export const SectorKpiRow: React.FC<SectorKpiRowProps> = ({ language, onCardClick }) => {
+export const SectorKpiRow: React.FC<SectorKpiRowProps> = ({ language, onCardClick, kpis: customKpis }) => {
+  const score = customKpis?.healthScore ?? 78;
+  const seatsVal = customKpis?.seats ?? 840000;
+  const demandVal = customKpis?.demand ?? 1120000;
+  const gapVal = customKpis?.gap ?? 280000;
+
   const dict = {
     en: {
       healthScore: 'Sector Health Index',
       healthSub: 'Moderate stress with localized deficits. Auto & Heavy Eng. driving 61% of negative strain.',
-      healthOutlook: 'Outlook: Strained',
-      healthDelta: '-3.4 pts YoY',
+      healthOutlook: score < 70 ? 'Outlook: Strained' : score < 80 ? 'Outlook: Moderate' : 'Outlook: Robust',
+      healthDelta: customKpis?.healthDelta || '-3.4 pts YoY',
       seatsTitle: 'Sanctioned Seats (FY 2026-27)',
       seatsSub: 'Approved annual intake capacity across ITIs, NSTIs & private centres.',
-      seatsTrend: '+7.4% (+58,200 seats) from baseline',
+      seatsTrend: customKpis?.seatsDelta || '+7.4% from baseline',
       demandTitle: 'Projected Annual Demand',
       demandSub: 'Aggregated industry requisitions across PLI & heavy engineering lines.',
-      demandTrend: '+18.1% (YoY) - Driven by PLI & Capex',
+      demandTrend: customKpis?.demandDelta || '+18.1% (YoY) - Driven by PLI & Capex',
       gapTitle: 'Net Deficit Gap (Annual)',
       gapSub: 'Cumulative shortage requiring emergency training sanctions.',
-      gapTrend: 'Critical deficit in 14 Priority Clusters',
+      gapTrend: customKpis?.gapTrend || 'Critical deficit in 14 Priority Clusters',
     },
     hi: {
       healthScore: 'क्षेत्रक स्वास्थ्य सूचकांक',
       healthSub: 'स्थानीय घाटों के साथ मध्यम दबाव। ऑटो और भारी इंजीनियरिंग 61% नकारात्मक दबाव पैदा कर रहे हैं।',
-      healthOutlook: 'परिदृश्य: तनावग्रस्त',
-      healthDelta: '-3.4 अंक वार्षिक',
+      healthOutlook: score < 70 ? 'परिदृश्य: तनावग्रस्त' : score < 80 ? 'परिदृश्य: मध्यम' : 'परिदृश्य: मजबूत',
+      healthDelta: customKpis?.healthDelta || '-3.4 अंक वार्षिक',
       seatsTitle: 'स्वीकृत सीटें (वित्तीय वर्ष 2026-27)',
       seatsSub: 'आईटीआई और निजी केंद्रों में स्वीकृत वार्षिक प्रवेश क्षमता।',
-      seatsTrend: 'आधारभूत स्तर से +7.4% (+58,200 सीटें)',
+      seatsTrend: customKpis?.seatsDelta || 'आधारभूत स्तर से +7.4%',
       demandTitle: 'अनुमानित वार्षिक मांग',
       demandSub: 'पीएलआई और विनिर्माण लाइनों से संकलित उद्योग मांग।',
-      demandTrend: '+18.1% (वार्षिक) - पीएलआई एवं कैपेक्स चालित',
+      demandTrend: customKpis?.demandDelta || '+18.1% (वार्षिक) - पीएलआई एवं कैपेक्स चालित',
       gapTitle: 'शुद्ध कमी अंतराल (वार्षिक)',
       gapSub: 'आपातकालीन प्रशिक्षण स्वीकृति की आवश्यकता वाला कुल घाटा।',
-      gapTrend: '14 प्राथमिकता वाले समूहों में गंभीर कमी',
+      gapTrend: customKpis?.gapTrend || '14 प्राथमिकता वाले समूहों में गंभीर कमी',
     },
   };
   const t = dict[language === 'hi' ? 'hi' : 'en'];
 
-  // Circular gauge calculations for 78/100
-  const score = 78;
+  // Circular gauge calculations for score/100
   const radius = 32;
   const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (score / 100) * circumference;
+  const strokeDashoffset = circumference - (Math.min(100, Math.max(0, score)) / 100) * circumference;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -131,7 +145,7 @@ export const SectorKpiRow: React.FC<SectorKpiRowProps> = ({ language, onCardClic
 
           <div className="my-2">
             <span className="text-2xl sm:text-3xl font-extrabold font-mono text-slate-900 tracking-tight tabular-nums">
-              840,000
+              {formatIndianNumber(seatsVal)}
             </span>
             <span className="text-xs font-semibold text-slate-500 ml-1.5 font-sans">
               seats
@@ -168,7 +182,7 @@ export const SectorKpiRow: React.FC<SectorKpiRowProps> = ({ language, onCardClic
 
           <div className="my-2">
             <span className="text-2xl sm:text-3xl font-extrabold font-mono text-[#0A3D62] tracking-tight tabular-nums">
-              1,120,000
+              {formatIndianNumber(demandVal)}
             </span>
             <span className="text-xs font-semibold text-slate-500 ml-1.5 font-sans">
               requisitions
@@ -205,7 +219,7 @@ export const SectorKpiRow: React.FC<SectorKpiRowProps> = ({ language, onCardClic
 
           <div className="my-2">
             <span className="text-2xl sm:text-3xl font-extrabold font-mono text-[#C62828] tracking-tight tabular-nums">
-              -280,000
+              -{formatIndianNumber(gapVal)}
             </span>
             <span className="text-xs font-semibold text-red-600 ml-1.5 font-sans">
               shortfall

@@ -35,14 +35,36 @@ interface MobilityCorridor {
   bilateralMouStatus: 'Signed' | 'In Discussion' | 'Pending';
 }
 
+import { useDashboardStore } from '../../stores/dashboardStore';
+
 export const TalentComparisonView: React.FC<TalentComparisonViewProps> = ({
   language,
   onNavigateHome,
   onShowToast,
 }) => {
+  const globalSector = useDashboardStore((s) => s.selectedSector);
+  const globalGeo = useDashboardStore((s) => s.selectedGeography);
+
+  const initialDest = globalGeo === 'GJ' ? 'Gujarat' : globalGeo === 'TN' ? 'Tamil Nadu' : globalGeo === 'KA' ? 'Karnataka' : 'Maharashtra';
   const [selectedTrade, setSelectedTrade] = useState('cnc');
   const [sourceState, setSourceState] = useState('Uttar Pradesh');
-  const [destState, setDestState] = useState('Maharashtra');
+  const [destState, setDestState] = useState(initialDest);
+
+  // Sync with global store changes
+  React.useEffect(() => {
+    if (globalGeo === 'GJ') setDestState('Gujarat');
+    else if (globalGeo === 'TN') setDestState('Tamil Nadu');
+    else if (globalGeo === 'KA') setDestState('Karnataka');
+    else if (globalGeo === 'MH') setDestState('Maharashtra');
+    else if (globalGeo === 'HR') setDestState('Haryana');
+  }, [globalGeo]);
+
+  React.useEffect(() => {
+    if (globalSector === 'semi') setSelectedTrade('cleanroom');
+    else if (globalSector === 'auto') setSelectedTrade('auto');
+    else if (globalSector === 'mfg') setSelectedTrade('cnc');
+    else if (globalSector === 'green') setSelectedTrade('solar');
+  }, [globalSector]);
 
   const corridors: MobilityCorridor[] = [
     {
@@ -275,11 +297,14 @@ export const TalentComparisonView: React.FC<TalentComparisonViewProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-800">
-              {corridors.map((c) => (
-                <tr key={c.id} className="hover:bg-blue-50/40 transition-colors">
-                  <td className="py-3 px-4 font-bold text-slate-900">
-                    {c.sourceState} <span className="text-[#0A3D62] font-black">→</span> {c.destState}
-                  </td>
+              {corridors.map((c) => {
+                const isMatch = c.destState.toLowerCase().includes(destState.toLowerCase());
+                return (
+                  <tr key={c.id} className={`transition-colors ${isMatch ? 'bg-blue-50/80 border-l-4 border-l-[#0A3D62]' : 'hover:bg-blue-50/40'}`}>
+                    <td className="py-3 px-4 font-bold text-slate-900 flex items-center gap-1.5">
+                      {isMatch && <span className="inline-block w-2 h-2 rounded-full bg-blue-600 animate-pulse" />}
+                      <span>{c.sourceState} <span className="text-[#0A3D62] font-black">→</span> {c.destState}</span>
+                    </td>
                   <td className="py-3 px-3 text-slate-700 font-medium">{c.primaryTrade}</td>
                   <td className="py-3 px-3 text-right font-mono font-bold text-slate-900">
                     {formatIndianNumber(c.annualMigrantVolume)}
@@ -313,7 +338,8 @@ export const TalentComparisonView: React.FC<TalentComparisonViewProps> = ({
                     </button>
                   </td>
                 </tr>
-              ))}
+              );
+            })}
             </tbody>
           </table>
         </div>

@@ -8,13 +8,16 @@ interface DistrictHeatmapMatrixProps {
   language: Language;
   onCellClick?: (district: DistrictHeatmapRow, tradeKey: string, cell: DistrictHeatmapCell) => void;
   onViewAllDistricts?: () => void;
+  heatmapData?: DistrictHeatmapRow[];
 }
 
 export const DistrictHeatmapMatrix: React.FC<DistrictHeatmapMatrixProps> = ({
   language,
   onCellClick,
   onViewAllDistricts,
+  heatmapData: customHeatmapData,
 }) => {
+  const activeRows = customHeatmapData || DISTRICT_HEATMAP_DATA;
   const [hoveredCell, setHoveredCell] = useState<{
     district: DistrictHeatmapRow;
     tradeName: string;
@@ -117,7 +120,7 @@ export const DistrictHeatmapMatrix: React.FC<DistrictHeatmapMatrixProps> = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {DISTRICT_HEATMAP_DATA.map((row) => (
+            {activeRows.map((row) => (
               <tr key={row.id} className="hover:bg-slate-50 transition-colors">
                 {/* District Name + Cluster Type */}
                 <td className="py-3 px-3">

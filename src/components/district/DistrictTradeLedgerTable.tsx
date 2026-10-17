@@ -7,12 +7,15 @@ import { Search, ArrowUpDown, AlertCircle, CheckCircle2, ChevronRight, SlidersHo
 interface DistrictTradeLedgerTableProps {
   language: Language;
   onActionClick: (trade: PuneTradeLedgerItem) => void;
+  trades?: PuneTradeLedgerItem[];
 }
 
 export const DistrictTradeLedgerTable: React.FC<DistrictTradeLedgerTableProps> = ({
   language,
   onActionClick,
+  trades: customTrades,
 }) => {
+  const activeTrades = customTrades || PUNE_TRADE_LEDGER;
   const [searchQuery, setSearchQuery] = useState('');
   const [severityFilter, setSeverityFilter] = useState<'all' | 'acute' | 'moderate' | 'balanced'>('all');
   const [sortField, setSortField] = useState<'gap' | 'demand' | 'capacity'>('gap');
@@ -30,7 +33,7 @@ export const DistrictTradeLedgerTable: React.FC<DistrictTradeLedgerTableProps> =
       gapCol: 'NET GAP (%)',
       severityCol: 'SEVERITY STATUS',
       actionCol: 'RECOMMENDED ACTION',
-      advisoryBanner: 'Advisory: Reallocating 3,400 seats from over-subscribed general electrical trades will close 72% of acute CNC & EV deficits within 60 days.',
+      advisoryBanner: 'Advisory: Reallocating seats from over-subscribed general electrical trades will close 72% of acute deficits within 60 days.',
       viewPolicies: 'View Re-allocation Blueprint',
     },
     hi: {
@@ -44,14 +47,14 @@ export const DistrictTradeLedgerTable: React.FC<DistrictTradeLedgerTableProps> =
       gapCol: 'शुद्ध अंतर (%)',
       severityCol: 'गंभीरता स्थिति',
       actionCol: 'अनुशंसित कार्यवाही',
-      advisoryBanner: 'सलाह: अधिशेष सामान्य इलेक्ट्रिकल व्यवसायों से 3,400 सीटों के पुनरावंटन से 60 दिनों में सीएनसी और ईवी घाटे का 72% समाप्त हो जाएगा।',
+      advisoryBanner: 'सलाह: अधिशेष सामान्य व्यवसायों से सीटों के पुनरावंटन से तीव्र घाटे समाप्त हो जाएंगे।',
       viewPolicies: 'पुनरावंटन ब्लूप्रिंट देखें',
     },
   };
   const t = dict[language === 'hi' ? 'hi' : 'en'];
 
   // Filtering and sorting
-  const filteredTrades = PUNE_TRADE_LEDGER.filter((item) => {
+  const filteredTrades = activeTrades.filter((item) => {
     const matchesSearch =
       item.trade.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.focusArea.toLowerCase().includes(searchQuery.toLowerCase());
