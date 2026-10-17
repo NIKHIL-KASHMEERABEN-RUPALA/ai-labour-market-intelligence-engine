@@ -82,6 +82,18 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isCopilotOpen, setIsCopilotOpen]);
 
+  // Ensure landing page URL defaults to ?tab=home on initial visit
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (!params.get('tab')) {
+        params.set('tab', 'home');
+        const newUrl = `${window.location.pathname}?${params.toString()}`;
+        window.history.replaceState({}, '', newUrl);
+      }
+    }
+  }, []);
+
   // Toast State
   const [toast, setToast] = useState<ToastMessage | null>(null);
 

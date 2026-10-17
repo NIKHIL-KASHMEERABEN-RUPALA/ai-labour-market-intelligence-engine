@@ -47,6 +47,16 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
   const items: SearchItem[] = [
     // Modules
     {
+      id: 'mod-home',
+      category: 'Module',
+      title: 'Home Landing (3D Industrial Clusters & Sovereign Mandate)',
+      titleHi: 'होम लैंडिंग (3डी औद्योगिक क्लस्टर एवं संप्रभु अधिदेश)',
+      subtitle: 'Global supply-chain 3D globe, partner nations, and ministerial sign-in',
+      icon: ShieldCheck,
+      actionType: 'navigate-tab',
+      payload: 'home',
+    },
+    {
       id: 'mod-mission',
       category: 'Module',
       title: 'Mission Cockpit (National Executive Overview)',

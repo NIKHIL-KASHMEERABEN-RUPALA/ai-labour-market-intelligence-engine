@@ -81,6 +81,7 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
+  { id: 'home', label: 'Home Landing', labelHi: 'होम लैंडिंग', icon: Home, category: 'core' },
   { id: 'mission', label: 'Mission Cockpit', labelHi: 'मिशन कॉकपिट', icon: Shield, badge: 'LIVE', category: 'core' },
   { id: 'command', label: 'National Command Center', labelHi: 'राष्ट्रीय कमान केंद्र', icon: LayoutDashboard, category: 'core' },
   { id: 'sector', label: 'Sector Intelligence', labelHi: 'क्षेत्रीय आसूचना', icon: Layers, category: 'core' },
@@ -102,7 +103,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenCabinetNote,
   onRefreshData,
   isRefreshing,
-  activeTab = 'mission',
+  activeTab = 'home',
   onOpenCommandPalette,
   onOpenCopilot,
   onNavigateTab,

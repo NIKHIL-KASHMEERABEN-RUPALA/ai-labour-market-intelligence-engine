@@ -61,7 +61,7 @@ export interface DashboardState {
 function getInitialFromUrl() {
   if (typeof window === 'undefined') {
     return {
-      tab: 'enablement',
+      tab: 'home',
       sector: 'all',
       horizon: '12m' as TimeHorizon,
       geo: 'all',
@@ -73,8 +73,21 @@ function getInitialFromUrl() {
   }
 
   const params = new URLSearchParams(window.location.search);
+  const tab = params.get('tab') || 'home';
+
+  // Ensure ?tab=home is reflected in URL if missing
+  try {
+    if (!params.get('tab')) {
+      params.set('tab', 'home');
+      const newUrl = `${window.location.pathname}?${params.toString()}`;
+      window.history.replaceState({}, '', newUrl);
+    }
+  } catch (e) {
+    // Ignore in restricted environments
+  }
+
   return {
-    tab: params.get('tab') || 'enablement',
+    tab,
     sector: params.get('sector') || 'all',
     horizon: (params.get('horizon') as TimeHorizon) || '12m',
     geo: params.get('geo') || 'all',
