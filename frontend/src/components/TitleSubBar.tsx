@@ -34,8 +34,35 @@ export const TitleSubBar: React.FC<TitleSubBarProps> = ({
       configureWeights: 'नीतिगत भार विन्यास',
       simulateInflow: 'लाइव अंतर्वाह अनुकरण',
     },
+    gu: {
+      kicker: 'અખિલ ભારતીય સમગ્ર / રાષ્ટ્રીય પરિદ્રશ્ય • Q3 નાણાકીય વર્ષ 2026-27',
+      title: 'રાષ્ટ્રીય શ્રમ અને કૌશલ્ય વેધશાળા',
+      titleHi: 'National Labour & Skill Observatory',
+      badge1: 'e-Shram અને NCS સમન્વયિત',
+      badge2: 'SIP નોંધાયેલ: 15,000+ પ્રદાતાઓ',
+      configureWeights: 'નીતિગત વજન વિન્યાસ',
+      simulateInflow: 'લાઈવ ઇનફ્લો સિમ્યુલેટ કરો',
+    },
+    ta: {
+      kicker: 'அகில இந்திய ஒட்டுமொத்த / தேசிய பார்வை • Q3 நிதியாண்டு 2026-27',
+      title: 'தேசிய தொழிலாளர் மற்றும் திறன் ஆய்வு மையம்',
+      titleHi: 'National Labour & Skill Observatory',
+      badge1: 'e-Shram மற்றும் NCS ஒத்திசைக்கப்பட்டது',
+      badge2: 'SIP பதிவு செய்யப்பட்டது: 15,000+ நிறுவனங்கள்',
+      configureWeights: 'கொள்கை எடைகளை அமைக்கவும்',
+      simulateInflow: 'நேரலை உள்ளீட்டை உருவகப்படுத்துங்கள்',
+    },
+    mr: {
+      kicker: 'अखिल भारतीय समग्र / राष्ट्रीय परिदृश्य • Q3 आर्थिक वर्ष 2026-27',
+      title: 'राष्ट्रीय श्रम व कौशल्य वेधशाळा',
+      titleHi: 'National Labour & Skill Observatory',
+      badge1: 'ई-श्रम व एनसीएस समक्रमित',
+      badge2: 'SIP नोंदणीकृत: 15,000+ प्रदाते',
+      configureWeights: 'धोरणात्मक भार संरचना',
+      simulateInflow: 'थेट अंतर्वाह सिम्युलेशन',
+    },
   };
-  const t = dict[language === 'hi' ? 'hi' : 'en'];
+  const t = (dict as any)[language] || dict.en;
 
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 pt-1 border-b border-slate-200">

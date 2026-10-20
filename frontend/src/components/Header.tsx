@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { Language, MinisterialNotification, UserRole } from '../types';
 import { useDashboardStore } from '../stores/dashboardStore';
+import { NAV_TRANSLATIONS } from '../utils/translations';
 
 interface HeaderProps {
   language: Language;
@@ -600,7 +601,7 @@ export const Header: React.FC<HeaderProps> = ({
                   }`}
                 >
                   <IconComp className={`h-3.5 w-3.5 shrink-0 ${isActive ? 'text-[#F28C28]' : 'text-slate-400 group-hover:text-slate-200'}`} />
-                  <span className="truncate">{language === 'en' ? item.label : item.labelHi}</span>
+                  <span className="truncate">{NAV_TRANSLATIONS[item.id]?.[language] || (language === 'en' ? item.label : item.labelHi)}</span>
 
                   {item.badge && (
                     <span
@@ -721,7 +722,7 @@ export const Header: React.FC<HeaderProps> = ({
                         >
                           <div className="flex items-center gap-2.5 min-w-0">
                             <IconComp className={`h-4 w-4 shrink-0 ${isActive ? 'text-[#F28C28]' : 'text-slate-400'}`} />
-                            <span className="truncate">{language === 'en' ? item.label : item.labelHi}</span>
+                            <span className="truncate">{NAV_TRANSLATIONS[item.id]?.[language] || (language === 'en' ? item.label : item.labelHi)}</span>
                           </div>
                           {item.badge && (
                             <span

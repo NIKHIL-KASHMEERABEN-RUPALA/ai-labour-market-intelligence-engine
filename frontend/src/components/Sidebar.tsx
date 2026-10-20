@@ -21,6 +21,8 @@ import {
 } from 'lucide-react';
 import { Language } from '../types';
 
+import { NAV_TRANSLATIONS } from '../utils/translations';
+
 interface SidebarProps {
   language: Language;
   activeTab: string;
@@ -155,11 +157,35 @@ export const Sidebar: React.FC<SidebarProps> = ({ language, activeTab, onTabChan
     },
   ];
 
-  const categoryTitles = {
-    core: { en: 'Strategic Command', hi: 'रणनीतिक कमान' },
-    war_rooms: { en: 'War Rooms & Forecasts', hi: 'वार रूम एवं पूर्वानुमान' },
-    ai_tools: { en: 'AI Systems & Mobility', hi: 'एआई प्रणाली एवं गतिशीलता' },
-    governance: { en: 'Evidence & Standards', hi: 'साक्ष्य एवं मानक' },
+  const categoryTitles: Record<string, Record<string, string>> = {
+    core: {
+      en: 'Strategic Command',
+      hi: 'रणनीतिक कमान',
+      gu: 'વ્યૂહાત્મક કમાન્ડ',
+      ta: 'வியூகக் கட்டளை மையம்',
+      mr: 'धोरणात्मक कमान',
+    },
+    war_rooms: {
+      en: 'War Rooms & Forecasts',
+      hi: 'वार रूम एवं पूर्वानुमान',
+      gu: 'વોર રૂમ અને આગાહીઓ',
+      ta: 'போர்க்கள அறைகள் & முன்னறிவிப்பு',
+      mr: 'वॉर रूम्स आणि अंदाज',
+    },
+    ai_tools: {
+      en: 'AI Systems & Mobility',
+      hi: 'एआई प्रणाली एवं गतिशीलता',
+      gu: 'એઆઈ સિસ્ટમ્સ અને ગતિશીલતા',
+      ta: 'AI அமைப்புகள் & இயக்கம்',
+      mr: 'एआय प्रणाली आणि गतिशीलता',
+    },
+    governance: {
+      en: 'Evidence & Standards',
+      hi: 'साक्ष्य एवं मानक',
+      gu: 'પુરાવા અને ધોરણો',
+      ta: 'ஆதாரங்கள் & ஆளுகை',
+      mr: 'पुरावे आणि मानके',
+    },
   };
 
   const categories: ('core' | 'war_rooms' | 'ai_tools' | 'governance')[] = [
@@ -200,7 +226,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ language, activeTab, onTabChan
             <div key={catKey} className="space-y-0.5">
               {!isCollapsed && (
                 <div className="px-2.5 py-1 text-[9px] font-black text-slate-400 uppercase tracking-wider font-mono">
-                  {language === 'en' ? categoryTitles[catKey].en : categoryTitles[catKey].hi}
+                  {categoryTitles[catKey]?.[language] || categoryTitles[catKey]?.en}
                 </div>
               )}
 
@@ -208,6 +234,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ language, activeTab, onTabChan
                 {items.map((item) => {
                   const Icon = item.icon;
                   const isActive = activeTab === item.id;
+                  const localizedLabel = NAV_TRANSLATIONS[item.id]?.[language] || (language === 'en' ? item.label : item.labelHi);
                   return (
                     <button
                       key={item.id}
@@ -219,7 +246,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ language, activeTab, onTabChan
                           ? 'bg-[#0B1F3A] text-white shadow-xs font-bold'
                           : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
                       }`}
-                      title={isCollapsed ? (language === 'en' ? item.label : item.labelHi) : undefined}
+                      title={isCollapsed ? localizedLabel : undefined}
                     >
                       <div className="flex items-center gap-2.5 truncate">
                         <Icon
@@ -229,7 +256,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ language, activeTab, onTabChan
                         />
                         {!isCollapsed && (
                           <span className="truncate">
-                            {language === 'en' ? item.label : item.labelHi}
+                            {localizedLabel}
                           </span>
                         )}
                       </div>

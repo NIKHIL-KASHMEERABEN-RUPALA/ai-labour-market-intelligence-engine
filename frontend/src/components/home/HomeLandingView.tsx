@@ -37,6 +37,8 @@ import {
 } from '../../data/globeWorldData';
 import { InteractiveGlobeR3F } from './InteractiveGlobeR3F';
 import { SovereignTelemetryBackground } from './SovereignTelemetryBackground';
+import { Language } from '../../types';
+import { HOME_TRANSLATIONS, getLangText } from '../../utils/translations';
 
 interface HomeLandingViewProps {
   onNavigateTab: (tabId: string) => void;
@@ -93,46 +95,120 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
     }, 900);
   };
 
+  const lang = (language as Language) || 'en';
+
   const features = [
     {
       id: 'mission',
-      title: language === 'en' ? 'Mission Cockpit & Telemetry' : 'मिशन कॉकपिट और टेलीमेट्री',
-      description: language === 'en' ? 'Live aggregation of 4.82M vacancies across NCS, e-Shram & NCVET with Bayesian prediction.' : 'एनसीएस, ई-श्रम और एनसीवीईटी पर 4.82 मिलियन रिक्तियों का लाइव एकीकरण।',
+      title: {
+        en: 'Mission Cockpit & Telemetry',
+        hi: 'मिशन कॉकपिट और टेलीमेट्री',
+        gu: 'મિશન કૉકપિટ અને ટેલિમેટ્રી',
+        ta: 'பணி கட்டுப்பாட்டு அறை & தொலை அளவீடு',
+        mr: 'मिशन कॉकपिट आणि थेट माहिती',
+      }[lang] || 'Mission Cockpit & Telemetry',
+      description: {
+        en: 'Live aggregation of 4.82M vacancies across NCS, e-Shram & NCVET with Bayesian prediction.',
+        hi: 'एनसीएस, ई-श्रम और एनसीवीईटी पर 4.82 मिलियन रिक्तियों का लाइव एकीकरण।',
+        gu: 'NCS, e-Shram અને NCVET પર 4.82 મિલિયન ખાલી જગ્યાઓનું લાઇવ એકત્રીકરણ.',
+        ta: 'NCS, e-Shram & NCVET ஆகியவற்றில் 4.82 மில்லியன் காலியிடங்களின் நேரலை தொகுப்பு.',
+        mr: 'NCS, e-Shram आणि NCVET वर 4.82 दशलक्ष रिक्त जागांचे थेट एकत्रीकरण.',
+      }[lang] || 'Live aggregation of 4.82M vacancies...',
       icon: ShieldCheck,
       color: 'bg-blue-50 text-[#0A3D62] border-blue-200',
     },
     {
       id: 'command',
-      title: language === 'en' ? 'National Command Centre' : 'राष्ट्रीय कमान केंद्र',
-      description: language === 'en' ? 'Macro-level policy control with interactive state choropleth maps and deficit indicators.' : 'इंटरैक्टिव राज्य कोरोप्लेथ मानचित्रों के साथ मैक्रो-स्तरीय नीति नियंत्रण।',
+      title: {
+        en: 'National Command Centre',
+        hi: 'राष्ट्रीय कमान केंद्र',
+        gu: 'રાષ્ટ્રીય કમાન્ડ સેન્ટર',
+        ta: 'தேசிய கட்டளை மையம்',
+        mr: 'राष्ट्रीय कमान केंद्र',
+      }[lang] || 'National Command Centre',
+      description: {
+        en: 'Macro-level policy control with interactive state choropleth maps and deficit indicators.',
+        hi: 'इंटरैक्टिव राज्य कोरोप्लेथ मानचित्रों के साथ मैक्रो-स्तरीय नीति नियंत्रण।',
+        gu: 'ઇન્ટરેક્ટિવ સ્ટેટ કોરોપ્લેથ નકશા અને ખાધ સૂચકાંકો સાથે નીતિ નિયંત્રણ.',
+        ta: 'மாநில வரைபடங்கள் மற்றும் பற்றாக்குறை குறியீடுகளுடன் கொள்கை கட்டுப்பாடு.',
+        mr: 'परस्परसंवादी राज्य नकाशे आणि तूट निर्देशांकांसह धोरणात्मक नियंत्रण.',
+      }[lang] || 'Macro-level policy control...',
       icon: LayoutDashboard,
       color: 'bg-indigo-50 text-indigo-700 border-indigo-200',
     },
     {
       id: 'sector',
-      title: language === 'en' ? 'Sector Intelligence (38 SSCs)' : 'क्षेत्रीय आसूचना (38 एसएससी)',
-      description: language === 'en' ? 'Deep-dive curriculum alignment, emerging roles, and industry hiring pulse gauges.' : 'गहन पाठ्यक्रम संरेखण, उभरती भूमिकाएं और उद्योग भर्ती पल्स गेज।',
+      title: {
+        en: 'Sector Intelligence (38 SSCs)',
+        hi: 'क्षेत्रीय आसूचना (38 एसएससी)',
+        gu: 'ક્ષેત્રીય ઇન્ટેલિજન્સ (38 SSC)',
+        ta: 'துறைசார் நுண்ணறிவு (38 SSCs)',
+        mr: 'क्षेत्रीय बुद्धिमत्ता (३८ एसएससी)',
+      }[lang] || 'Sector Intelligence (38 SSCs)',
+      description: {
+        en: 'Deep-dive curriculum alignment, emerging roles, and industry hiring pulse gauges.',
+        hi: 'गहन पाठ्यक्रम संरेखण, उभरती भूमिकाएं और उद्योग भर्ती पल्स गेज।',
+        gu: 'અભ્યાસક્રમ સંરેખણ, ઉભરતી ભૂમિકાઓ અને ઉદ્યોગ ભરતી પલ્સ.',
+        ta: 'பாடத்திட்ட சீரமைப்பு, புதிய பணிக் களங்கள் மற்றும் வேலைவாய்ப்பு நிலவரம்.',
+        mr: 'अभ्यासक्रम पुनर्रचना, नवीन रोजगार भूमिका आणि उद्योग भरती वेग.',
+      }[lang] || 'Deep-dive curriculum alignment...',
       icon: Layers,
       color: 'bg-emerald-50 text-emerald-700 border-emerald-200',
     },
     {
       id: 'district',
-      title: language === 'en' ? 'District War-Rooms (Pune / DSDC)' : 'जिला वार-रूम (पुणे / डीएसडीसी)',
-      description: language === 'en' ? 'Localized industrial corridor intervention, PMKVY 4.0 seat sanctions, and deficit resolution.' : 'स्थानीय औद्योगिक गलियारा हस्तक्षेप, पीएमकेवीवाई 4.0 सीट स्वीकृतियां।',
+      title: {
+        en: 'District War-Rooms (Pune / DSDC)',
+        hi: 'जिला वार-रूम (पुणे / डीएसडीसी)',
+        gu: 'જિલ્લા વૉર રૂમ (પુણે / DSDC)',
+        ta: 'மாவட்ட களப்பணி அறை (புனே / DSDC)',
+        mr: 'जिल्हा वॉर-रूम (पुणे / डीएसडीसी)',
+      }[lang] || 'District War-Rooms (Pune / DSDC)',
+      description: {
+        en: 'Localized industrial corridor intervention, PMKVY 4.0 seat sanctions, and deficit resolution.',
+        hi: 'स्थानीय औद्योगिक गलियारा हस्तक्षेप, पीएमकेवीवाई 4.0 सीट स्वीकृतियां।',
+        gu: 'સ્થાનિક ઔદ્યોગિક કોરિડોર હસ્તક્ષેપ, PMKVY 4.0 સીટ મંજૂરીઓ.',
+        ta: 'உள்ளூர் தொழில்துறை வழித்தட தலையீடு & PMKVY 4.0 இடங்கள் ஒதுக்கீடு.',
+        mr: 'स्थानिक औद्योगिक कॉरिडॉर कृती, पीएमकेव्हीवाय ४.० जागा मंजुरी.',
+      }[lang] || 'Localized industrial corridor intervention...',
       icon: MapPin,
       color: 'bg-amber-50 text-amber-700 border-amber-200',
     },
     {
       id: 'reports',
-      title: language === 'en' ? 'Pre-Engineered Cabinet Briefs' : 'पूर्व-अभियंत्रित कैबिनेट ब्रीफ',
-      description: language === 'en' ? 'One-click generation of CCEA notes, PDF/DOCX multi-page dossiers with cryptographic audit trail.' : 'क्रिप्टोग्राफिक ऑडिट ट्रेल के साथ सीसीईए नोट्स, पीडीएफ/डॉक्स का निर्माण।',
+      title: {
+        en: 'Pre-Engineered Cabinet Briefs',
+        hi: 'पूर्व-अभियंत्रित कैबिनेट ब्रीफ',
+        gu: 'કેબિનેટ બ્રીફિંગ દસ્તાવેજો',
+        ta: 'அமைச்சரவை சுருக்கக் குறிப்புகள்',
+        mr: 'पूर्व-संपादित कॅबिनेट माहिती टिपणे',
+      }[lang] || 'Pre-Engineered Cabinet Briefs',
+      description: {
+        en: 'One-click generation of CCEA notes, PDF/DOCX multi-page dossiers with cryptographic audit trail.',
+        hi: 'क्रिप्टोग्राफिक ऑडिट ट्रेल के साथ सीसीईए नोट्स, पीडीएफ/डॉक्स का निर्माण।',
+        gu: 'ક્રિપ્ટોગ્રાફિક ઓડિટ સાથે CCEA નોંધો, પીડીએફ અને દસ્તાવેજોનું નિર્માણ.',
+        ta: 'பாதுகாப்பான தணிக்கை தடயத்துடன் CCEA குறிப்புகள், PDF ஆவணங்கள் உருவாக்கம்.',
+        mr: 'डिजिटल सुरक्षेसह सीसीईए टिपणे आणि अधिकृत पीडीएफ फाइल्स तयार करा.',
+      }[lang] || 'One-click generation of CCEA notes...',
       icon: FileText,
       color: 'bg-purple-50 text-purple-700 border-purple-200',
     },
     {
       id: 'copilot',
-      title: language === 'en' ? 'AI Policy Copilot (Gemini RAG)' : 'एआई नीति कोपायलट (जेमिनी आरएजी)',
-      description: language === 'en' ? 'Deterministic policy assistant grounded in NCVET standards, PLFS datasets, and labour law.' : 'एनसीवीईटी मानकों, पीएलएफएस डेटासेट पर आधारित नीति सहायक।',
+      title: {
+        en: 'AI Policy Copilot (Gemini RAG)',
+        hi: 'एआई नीति कोपायलट (जेमिनी आरएजी)',
+        gu: 'એઆઈ પોલિસી કોપાયલોટ (RAG)',
+        ta: 'AI கொள்கை வழிகாட்டி (RAG)',
+        mr: 'एआय धोरण सहाय्यक (कोपायलट)',
+      }[lang] || 'AI Policy Copilot (Gemini RAG)',
+      description: {
+        en: 'Deterministic policy assistant grounded in NCVET standards, PLFS datasets, and labour law.',
+        hi: 'एनसीवीईटी मानकों, पीएलएफएस डेटासेट पर आधारित नीति सहायक।',
+        gu: 'NCVET ધોરણો અને PLFS ડેટાસેટ્સ પર આધારિત બુદ્ધિશાળી સહાયક.',
+        ta: 'NCVET மற்றும் PLFS தரவுகளின் அடிப்படையில் இயங்கும் கொள்கை உதவியாளர்.',
+        mr: 'एनसीव्हीईटी मानके आणि अधिकृत डेटावर आधारित धोरण सहाय्यक.',
+      }[lang] || 'Deterministic policy assistant...',
       icon: Sparkles,
       color: 'bg-rose-50 text-rose-700 border-rose-200',
     },
@@ -149,8 +225,12 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
               🇮🇳
             </div>
             <div className="min-w-0">
-              <div className="text-[10px] sm:text-xs font-mono font-bold text-[#F28C28] truncate">GOVERNMENT OF INDIA • MSDE</div>
-              <div className="text-xs sm:text-sm font-extrabold tracking-tight truncate">Labour Market Intelligence System (LMIS)</div>
+              <div className="text-[10px] sm:text-xs font-mono font-bold text-[#F28C28] truncate">
+                {{ en: 'GOVERNMENT OF INDIA • MSDE', hi: 'भारत सरकार • कौशल विकास मंत्रालय', gu: 'ભારત સરકાર • MSDE', ta: 'இந்திய அரசு • MSDE', mr: 'भारत सरकार • कौशल्य विकास मंत्रालय' }[lang]}
+              </div>
+              <div className="text-xs sm:text-sm font-extrabold tracking-tight truncate">
+                {{ en: 'Labour Market Intelligence System (LMIS)', hi: 'श्रम बाजार आसूचना प्रणाली (एलएमआईएस)', gu: 'શ્રમ બજાર ઇન્ટેલિજન્સ સિસ્ટમ (LMIS)', ta: 'தொழிலாளர் சந்தை நுண்ணறிவு அமைப்பு (LMIS)', mr: 'श्रम बाजार बुद्धिमत्ता प्रणाली (LMIS)' }[lang]}
+              </div>
             </div>
           </div>
 
@@ -160,7 +240,7 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
               className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 text-white transition-all cursor-pointer flex items-center gap-1.5 sm:gap-2 border border-white/20"
             >
               <LogIn className="h-3.5 w-3.5 text-[#38BDF8]" />
-              <span>Sign In</span>
+              <span>{{ en: 'Sign In', hi: 'साइन इन', gu: 'સાઇન ઇન', ta: 'உள்நுழைக', mr: 'साइन इन' }[lang]}</span>
             </button>
 
             <button
@@ -168,7 +248,7 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
               className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-bold bg-[#F28C28] hover:bg-[#d97722] text-white transition-all cursor-pointer flex items-center gap-1.5 sm:gap-2 shadow"
             >
               <UserPlus className="h-3.5 w-3.5" />
-              <span>Sign Up</span>
+              <span>{{ en: 'Sign Up', hi: 'साइन अप', gu: 'સાઇન અપ', ta: 'பதிவு செய்க', mr: 'साइन अप' }[lang]}</span>
             </button>
           </div>
         </div>
@@ -187,36 +267,34 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
             {/* Government Badge */}
             <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[10px] sm:text-xs font-mono font-bold text-[#F28C28] max-w-full truncate">
               <Award className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
-              <span className="truncate">MINISTRY OF SKILL DEVELOPMENT & ENTREPRENEURSHIP • GOVT. OF INDIA</span>
+              <span className="truncate">{HOME_TRANSLATIONS.heroTag[lang]}</span>
             </div>
 
             <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight">
-              {language === 'en' ? 'National Labour & Skill Observatory' : 'राष्ट्रीय श्रम एवं कौशल वेधशाला'}
+              {HOME_TRANSLATIONS.heroTitle[lang]}
             </h1>
 
             <p className="text-slate-200 text-xs sm:text-sm md:text-base leading-relaxed max-w-2xl font-normal">
-              {language === 'en'
-                ? 'High-stakes Bayesian decision support system, real-time vacancy telemetry, and predictive workforce optimization across 22+ key industrial corridors, 742 districts & global mobility corridors.'
-                : 'भारत के 742 जिलों और 38 सेक्टर स्किल काउंसिल को संचालित करने वाला उच्च-स्तरीय बायेसियन निर्णय समर्थन प्रणाली।'}
+              {HOME_TRANSLATIONS.heroSubtitle[lang]}
             </p>
 
             {/* Key Stats Bar */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 pt-1">
               <div className="bg-white/5 backdrop-blur-md p-3 sm:p-3.5 rounded-xl border border-white/10">
                 <div className="text-xl sm:text-2xl lg:text-3xl font-black text-[#F28C28] font-mono">4.82M</div>
-                <div className="text-[10px] sm:text-[11px] text-slate-300 uppercase font-medium mt-0.5">Live Vacancies</div>
+                <div className="text-[10px] sm:text-[11px] text-slate-300 uppercase font-medium mt-0.5">{HOME_TRANSLATIONS.liveVacancies[lang]}</div>
               </div>
               <div className="bg-white/5 backdrop-blur-md p-3 sm:p-3.5 rounded-xl border border-white/10">
                 <div className="text-xl sm:text-2xl lg:text-3xl font-black text-white font-mono">22+</div>
-                <div className="text-[10px] sm:text-[11px] text-slate-300 uppercase font-medium mt-0.5">Corridors</div>
+                <div className="text-[10px] sm:text-[11px] text-slate-300 uppercase font-medium mt-0.5">{HOME_TRANSLATIONS.corridors[lang]}</div>
               </div>
               <div className="bg-white/5 backdrop-blur-md p-3 sm:p-3.5 rounded-xl border border-white/10">
                 <div className="text-xl sm:text-2xl lg:text-3xl font-black text-[#38BDF8] font-mono">14</div>
-                <div className="text-[10px] sm:text-[11px] text-slate-300 uppercase font-medium mt-0.5">Partner Nations</div>
+                <div className="text-[10px] sm:text-[11px] text-slate-300 uppercase font-medium mt-0.5">{HOME_TRANSLATIONS.partnerNations[lang]}</div>
               </div>
               <div className="bg-white/5 backdrop-blur-md p-3 sm:p-3.5 rounded-xl border border-white/10">
                 <div className="text-xl sm:text-2xl lg:text-3xl font-black text-emerald-400 font-mono">99.4%</div>
-                <div className="text-[10px] sm:text-[11px] text-slate-300 uppercase font-medium mt-0.5">Accuracy</div>
+                <div className="text-[10px] sm:text-[11px] text-slate-300 uppercase font-medium mt-0.5">{HOME_TRANSLATIONS.accuracy[lang]}</div>
               </div>
             </div>
 
@@ -226,7 +304,7 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
                 onClick={() => onNavigateTab('mission')}
                 className="flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-xl text-xs sm:text-sm font-extrabold bg-[#F28C28] text-white hover:bg-[#d97722] shadow-lg transition-all cursor-pointer transform hover:-translate-y-0.5"
               >
-                <span>Launch National Cockpit</span>
+                <span>{HOME_TRANSLATIONS.launchCockpit[lang]}</span>
                 <ArrowRight className="h-4 w-4" />
               </button>
 
@@ -235,7 +313,7 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
                 className="flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-xl text-xs sm:text-sm font-bold bg-white/10 hover:bg-white/20 text-white border border-white/30 backdrop-blur-md transition-all cursor-pointer"
               >
                 <LogIn className="h-4 w-4 text-[#38BDF8]" />
-                <span>Official Secure Login</span>
+                <span>{HOME_TRANSLATIONS.officialLogin[lang]}</span>
               </button>
             </div>
 
@@ -311,7 +389,7 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
             <div className="text-xs font-mono font-bold text-[#38BDF8] uppercase tracking-wider flex items-center gap-2">
               <MapPin className="h-4 w-4 text-[#F28C28]" />
-              <span>India Industrial Corridors & Global Skilling Partners</span>
+              <span>{HOME_TRANSLATIONS.corridorsSectionTitle[lang]}</span>
             </div>
 
             {/* Region Filter Buttons */}
@@ -606,11 +684,11 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2.5">
-              <span>Enterprise Decision Modules</span>
+              <span>{HOME_TRANSLATIONS.enterpriseModulesTitle[lang]}</span>
               <span className="text-[10px] font-mono text-[#F28C28] bg-[#F28C28]/15 px-2 py-0.5 rounded border border-[#F28C28]/30 font-bold uppercase">6 Sovereign Hubs</span>
             </h2>
             <p className="text-xs sm:text-sm text-slate-300 mt-1">
-              Select any operational hub to inspect telemetry, deficit forecasts, and policy action matrices.
+              {HOME_TRANSLATIONS.enterpriseModulesSub[lang]}
             </p>
           </div>
           <button
@@ -673,13 +751,13 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
         <div className="space-y-2 max-w-3xl">
           <div className="flex items-center gap-2 text-xs font-mono font-bold text-emerald-400">
             <Lock className="h-4 w-4" />
-            <span>NIC MEGHRAJ CLOUD INFRASTRUCTURE • SECURE GOV-NET</span>
+            <span>{HOME_TRANSLATIONS.cagCertified[lang]}</span>
           </div>
           <h3 className="text-xl font-extrabold tracking-tight">
-            Certified for Parliamentary Briefings & Cabinet Note Circulation
+            {{ en: 'Certified for Parliamentary Briefings & Cabinet Note Circulation', hi: 'संसदीय ब्रीफिंग एवं कैबिनेट नोट हेतु प्रमाणित', gu: 'સંસદીય બ્રીફિંગ અને કેબિનેટ પરિપત્ર માટે પ્રમાણિત', ta: 'நாடாளுமன்ற சுருக்கங்கள் மற்றும் அமைச்சரவை சுற்றறிக்கைக்கு சான்றளிக்கப்பட்டது', mr: 'संसदीय माहिती आणि कॅबिनेट टिपणासाठी प्रमाणित' }[lang]}
           </h3>
           <p className="text-xs text-slate-400 leading-relaxed">
-            All reports and analytics embed SHA-256 cryptographic non-repudiation hashes, ensuring absolute data integrity for Comptroller and Auditor General (CAG) audits and Cabinet Secretariat reviews.
+            {HOME_TRANSLATIONS.cagAuditText[lang]}
           </p>
         </div>
 
@@ -689,7 +767,7 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
             className="px-5 py-3 rounded-xl text-xs font-bold bg-[#0A3D62] hover:bg-[#072a44] text-white border border-blue-700/50 transition-all cursor-pointer flex items-center gap-2"
           >
             <FileText className="h-4 w-4 text-[#F28C28]" />
-            <span>Export Official PDF Dossier</span>
+            <span>{HOME_TRANSLATIONS.exportPdfBtn[lang]}</span>
           </button>
 
           <button
@@ -697,7 +775,7 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
             className="px-5 py-3 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 text-white transition-all cursor-pointer flex items-center gap-2 border border-white/20"
           >
             <Cpu className="h-4 w-4 text-[#38BDF8]" />
-            <span>OpenAPI Console</span>
+            <span>{HOME_TRANSLATIONS.openApiBtn[lang]}</span>
           </button>
         </div>
       </div>
