@@ -36,6 +36,7 @@ import {
   GlobalCountry
 } from '../../data/globeWorldData';
 import { InteractiveGlobeR3F } from './InteractiveGlobeR3F';
+import { SovereignTelemetryBackground } from './SovereignTelemetryBackground';
 
 interface HomeLandingViewProps {
   onNavigateTab: (tabId: string) => void;
@@ -138,44 +139,45 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
   ];
 
   return (
-    <div className="space-y-8 sm:space-y-10 max-w-[1600px] mx-auto pb-16 animate-fadeIn relative">
-      
-      {/* TOP HEADER WITH SIGN IN / SIGN UP ACTIONS */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900/90 backdrop-blur-md px-3.5 sm:px-6 py-3 sm:py-4 rounded-xl sm:rounded-2xl border border-slate-800 text-white shadow-lg relative">
-        <div className="flex items-center gap-2.5">
-          <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-gradient-to-br from-[#0A3D62] to-[#F28C28] flex items-center justify-center font-black text-white shadow shrink-0">
-            🇮🇳
-          </div>
-          <div className="min-w-0">
-            <div className="text-[10px] sm:text-xs font-mono font-bold text-[#F28C28] truncate">GOVERNMENT OF INDIA • MSDE</div>
-            <div className="text-xs sm:text-sm font-extrabold tracking-tight truncate">Labour Market Intelligence System (LMIS)</div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 sm:gap-3 self-end sm:self-auto">
-          <button
-            onClick={() => { setAuthModal('signin'); setAuthSuccessMsg(''); }}
-            className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 text-white transition-all cursor-pointer flex items-center gap-1.5 sm:gap-2 border border-white/20"
-          >
-            <LogIn className="h-3.5 w-3.5 text-[#38BDF8]" />
-            <span>Sign In</span>
-          </button>
-
-          <button
-            onClick={() => { setAuthModal('signup'); setAuthSuccessMsg(''); }}
-            className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-bold bg-[#F28C28] hover:bg-[#d97722] text-white transition-all cursor-pointer flex items-center gap-1.5 sm:gap-2 shadow"
-          >
-            <UserPlus className="h-3.5 w-3.5" />
-            <span>Sign Up</span>
-          </button>
-        </div>
-      </div>
-
-      {/* 1. HERO SECTION WITH 3D WORLD GLOBE & SCATTERED INDIAN INDUSTRIAL CLUSTERS */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#07243e] via-[#0A3D62] to-[#041627] text-white p-4 sm:p-8 lg:p-10 shadow-2xl border border-blue-900/50">
+    <SovereignTelemetryBackground className="w-full max-w-full min-h-screen px-3 sm:px-6 lg:px-8 py-4 sm:py-6 overflow-x-hidden">
+      <div className="space-y-8 sm:space-y-10 max-w-[1600px] mx-auto pb-16 animate-fadeIn relative w-full">
         
-        {/* Background Decorative Grid */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:3rem_3rem] pointer-events-none" />
+        {/* TOP HEADER WITH SIGN IN / SIGN UP ACTIONS */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900/85 backdrop-blur-xl px-3.5 sm:px-6 py-3 sm:py-4 rounded-xl sm:rounded-2xl border border-slate-700/60 text-white shadow-xl relative">
+          <div className="flex items-center gap-2.5">
+            <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-gradient-to-br from-[#0A3D62] to-[#F28C28] flex items-center justify-center font-black text-white shadow shrink-0">
+              🇮🇳
+            </div>
+            <div className="min-w-0">
+              <div className="text-[10px] sm:text-xs font-mono font-bold text-[#F28C28] truncate">GOVERNMENT OF INDIA • MSDE</div>
+              <div className="text-xs sm:text-sm font-extrabold tracking-tight truncate">Labour Market Intelligence System (LMIS)</div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 sm:gap-3 self-end sm:self-auto">
+            <button
+              onClick={() => { setAuthModal('signin'); setAuthSuccessMsg(''); }}
+              className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 text-white transition-all cursor-pointer flex items-center gap-1.5 sm:gap-2 border border-white/20"
+            >
+              <LogIn className="h-3.5 w-3.5 text-[#38BDF8]" />
+              <span>Sign In</span>
+            </button>
+
+            <button
+              onClick={() => { setAuthModal('signup'); setAuthSuccessMsg(''); }}
+              className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-bold bg-[#F28C28] hover:bg-[#d97722] text-white transition-all cursor-pointer flex items-center gap-1.5 sm:gap-2 shadow"
+            >
+              <UserPlus className="h-3.5 w-3.5" />
+              <span>Sign Up</span>
+            </button>
+          </div>
+        </div>
+
+        {/* 1. HERO SECTION WITH 3D WORLD GLOBE & SCATTERED INDIAN INDUSTRIAL CLUSTERS */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#07243e]/85 via-[#0A3D62]/75 to-[#041627]/85 backdrop-blur-xl text-white p-4 sm:p-8 lg:p-10 shadow-2xl border border-sky-400/30 ring-1 ring-white/10">
+          
+          {/* Background Decorative Grid */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:3rem_3rem] pointer-events-none" />
         
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center relative z-10">
           
@@ -603,16 +605,17 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-              Enterprise Decision Modules
+            <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2.5">
+              <span>Enterprise Decision Modules</span>
+              <span className="text-[10px] font-mono text-[#F28C28] bg-[#F28C28]/15 px-2 py-0.5 rounded border border-[#F28C28]/30 font-bold uppercase">6 Sovereign Hubs</span>
             </h2>
-            <p className="text-xs sm:text-sm text-slate-600 mt-1">
+            <p className="text-xs sm:text-sm text-slate-300 mt-1">
               Select any operational hub to inspect telemetry, deficit forecasts, and policy action matrices.
             </p>
           </div>
           <button
             onClick={() => onNavigateTab('command')}
-            className="text-xs font-bold text-blue-700 hover:underline flex items-center gap-1 cursor-pointer"
+            className="text-xs font-bold text-[#38BDF8] hover:text-sky-300 hover:underline flex items-center gap-1 cursor-pointer transition-colors"
           >
             <span>View All Modules in Command Center</span>
             <ArrowRight className="h-3.5 w-3.5" />
@@ -628,8 +631,8 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
                 onMouseEnter={() => setHoveredCard(idx)}
                 onMouseLeave={() => setHoveredCard(null)}
                 onClick={() => onNavigateTab(feature.id)}
-                className={`bg-white rounded-xl p-6 shadow-xs border transition-all duration-300 cursor-pointer flex flex-col justify-between group relative overflow-hidden ${
-                  hoveredCard === idx ? 'border-blue-500 shadow-lg -translate-y-1' : 'border-slate-200/90'
+                className={`bg-slate-900/85 hover:bg-slate-900/95 backdrop-blur-md rounded-xl p-6 shadow-xl border transition-all duration-300 cursor-pointer flex flex-col justify-between group relative overflow-hidden ${
+                  hoveredCard === idx ? 'border-sky-400 shadow-2xl shadow-sky-500/15 -translate-y-1' : 'border-slate-800'
                 }`}
               >
                 {/* Accent top bar */}
@@ -637,27 +640,27 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
 
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <div className={`p-3 rounded-xl border ${feature.color}`}>
+                    <div className="p-3 rounded-xl border bg-slate-800/80 border-slate-700/80 text-[#38BDF8]">
                       <IconComponent className="h-6 w-6" />
                     </div>
-                    <span className="text-[10px] font-mono font-bold uppercase text-slate-400 bg-slate-100 px-2 py-1 rounded">
+                    <span className="text-[10px] font-mono font-bold uppercase text-slate-400 bg-slate-800/80 px-2 py-1 rounded border border-slate-700/60">
                       Module 0{idx + 1}
                     </span>
                   </div>
 
-                  <h3 className="text-base font-extrabold text-slate-900 group-hover:text-[#0A3D62] transition-colors">
+                  <h3 className="text-base font-extrabold text-white group-hover:text-sky-300 transition-colors">
                     {feature.title}
                   </h3>
-                  <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                  <p className="text-xs text-slate-300 mt-2 leading-relaxed">
                     {feature.description}
                   </p>
                 </div>
 
-                <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-100 text-xs font-bold text-[#0A3D62]">
-                  <span className="group-hover:translate-x-1 transition-transform flex items-center gap-1">
+                <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-800/90 text-xs font-bold text-sky-400">
+                  <span className="group-hover:translate-x-1 transition-transform flex items-center gap-1 text-slate-200 group-hover:text-sky-300">
                     Access Dashboard <ArrowRight className="h-3.5 w-3.5 text-[#F28C28]" />
                   </span>
-                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
                 </div>
               </div>
             );
@@ -830,6 +833,7 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
         </div>
       )}
 
-    </div>
+      </div>
+    </SovereignTelemetryBackground>
   );
 };

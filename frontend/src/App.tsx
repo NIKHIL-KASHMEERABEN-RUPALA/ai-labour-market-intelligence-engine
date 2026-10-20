@@ -16,6 +16,7 @@ import { SaturationRankingView } from './components/saturation/SaturationRanking
 import { CapacityTargetView } from './components/capacity/CapacityTargetView';
 import { DataObservatoryView } from './components/data/DataObservatoryView';
 import { ReportsBriefsView } from './components/reports/ReportsBriefsView';
+import { ReportsAlertsView } from './components/reports/ReportsAlertsView';
 import { HelpMethodologyView } from './components/help/HelpMethodologyView';
 import { OfficerEnablementView } from './components/enablement/OfficerEnablementView';
 import { TalentComparisonView } from './components/talent/TalentComparisonView';
@@ -158,7 +159,13 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F8FAFC] text-slate-900 font-sans selection:bg-blue-100 selection:text-[#0A3D62]">
+    <div
+      className={`min-h-screen w-full max-w-full flex flex-col font-sans overflow-x-hidden ${
+        activeSidebarTab === 'home'
+          ? 'bg-[#020B17] text-white'
+          : 'bg-[#F8FAFC] text-slate-900 selection:bg-blue-100 selection:text-[#0A3D62]'
+      }`}
+    >
       
       {/* 1. Top Dark Navy Header Bar */}
       <Header
@@ -186,15 +193,22 @@ export default function App() {
       />
 
       {/* Main Workspace Frame with Full Width Main Content */}
-      <div className="flex-1 flex flex-col w-full">
+      <div className="flex-1 flex flex-col w-full max-w-full overflow-x-hidden">
         {/* Main Content Viewport */}
-        <main className="flex-1 px-2.5 sm:px-4 md:px-6 py-3 sm:py-5 max-w-[1700px] mx-auto space-y-3.5 sm:space-y-4 w-full">
+        <main
+          className={`flex-1 w-full max-w-full overflow-x-hidden mx-auto ${
+            activeSidebarTab === 'home'
+              ? 'p-0 max-w-none'
+              : 'px-2.5 sm:px-4 md:px-6 py-3 sm:py-5 max-w-[1700px] space-y-3.5 sm:space-y-4'
+          }`}
+        >
           
           {/* Global Header Filter Bar (Affects EVERY page, shareable URL state, live recomputations) */}
           {activeSidebarTab !== 'home' &&
             activeSidebarTab !== 'situational' &&
             activeSidebarTab !== 'data' &&
             activeSidebarTab !== 'enablement' &&
+            activeSidebarTab !== 'alerts' &&
             activeSidebarTab !== 'help' && (
             <GlobalFilterBar
               language={language}
@@ -346,7 +360,17 @@ export default function App() {
                 setToast({ id: Date.now().toString(), type, title, message });
               }}
             />
-          ) : activeSidebarTab === 'reports' || activeSidebarTab === 'alerts' ? (
+          ) : activeSidebarTab === 'alerts' ? (
+            <ReportsAlertsView
+              language={language}
+              onNavigateHome={() => setActiveSidebarTab('mission')}
+              onNavigateToSituational={() => setActiveSidebarTab('situational')}
+              onNavigateToCabinetHub={() => setActiveSidebarTab('reports')}
+              onShowToast={(title, message, type = 'success') => {
+                setToast({ id: Date.now().toString(), type, title, message });
+              }}
+            />
+          ) : activeSidebarTab === 'reports' ? (
             <ReportsBriefsView
               language={language}
               onNavigateHome={() => setActiveSidebarTab('mission')}
